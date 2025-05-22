@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -13,4 +13,5 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "backend.wsgi:application --bind 0.0.0.0:$PORT"]
+CMD gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-5000}
+
