@@ -1,7 +1,7 @@
 # authentication/views.py
 
 from django.contrib.auth import authenticate
-from rest_framework import status, generics, mixins
+from rest_framework import status, generics, mixins, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -60,14 +60,7 @@ class UserProfileView(APIView):
         return Response(serializer.data)
 
 
-class AddressViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView
-):
+class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
