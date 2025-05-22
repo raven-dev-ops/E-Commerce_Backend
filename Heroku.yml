@@ -3,4 +3,4 @@ build:
     web: Dockerfile
 
 run:
-  web: backend.wsgi:application
+  web: gunicorn backend.wsgi:application
