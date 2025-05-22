@@ -1,35 +1,24 @@
 #!/bin/bash
 
-# Name of your Heroku app
 APP_NAME="twiinz-beard-backend"
 
-# Logging into Heroku container registry
 echo "Logging into Heroku container registry..."
 heroku container:login
 
-# Building a new Docker image without using cache
-echo "Building new Docker image..."
-docker build --no-cache -t main:latest .
+echo "Building new Docker image and tagging for Heroku registry..."
+docker build --no-cache -t registry.heroku.com/$APP_NAME/web .
 
-# Tagging Docker image for Heroku
-echo "Tagging Docker image..."
-docker tag main:latest registry.heroku.com/$APP_NAME/web
-
-# Pushing Docker image to Heroku
 echo "Pushing Docker image to Heroku..."
 docker push registry.heroku.com/$APP_NAME/web
 
-# Releasing Docker container on Heroku
-echo "Releasing Docker container..."
+echo "Releasing Docker container on Heroku..."
 heroku container:release web -a $APP_NAME
 
 echo "Restarting dynos to force new image deployment..."
 heroku ps:restart -a $APP_NAME
 
-# Checking process status on Heroku
 echo "Checking process status..."
 heroku ps -a $APP_NAME
 
-# Tailing logs from Heroku
 echo "Tailing logs..."
 heroku logs --tail -a $APP_NAME
