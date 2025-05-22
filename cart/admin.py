@@ -1,3 +1,7 @@
-from django.contrib import admin
+# cart/admin.py
 
-# Register your models here.
+from django_mongoengine.mongo_admin.sites import site as mongo_admin_site
+from .models import Cart, CartItem
+
+mongo_admin_site.register(Cart)
+mongo_admin_site.register(CartItem)

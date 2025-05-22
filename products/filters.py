@@ -1,3 +1,5 @@
+# product/filters.py
+
 from django_mongoengine_filter import FilterSet
 from .models import Product
 

@@ -1,3 +1,108 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
-# Create your views here.
+from .models import Cart, CartItem
+from .serializers import CartItemSerializer
+
+class CartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_cart(self, user):
+        cart, created = Cart.objects.get_or_create(user=user)
+        return cart
+
+    def get(self, request):
+        cart = self.get_cart(request.user)
+        items = cart.items.all()
+        serializer = CartItemSerializer(items, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        """
+        Add item to cart or update quantity if already present.
+        Expects JSON:
+        {
+            "product_id": "some-product-id",
+            "quantity": 1
+        }
+        """
+        cart = self.get_cart(request.user)
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity', 1)
+
+        if not product_id:
+            return Response({"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            quantity = int(quantity)
+            if quantity < 1:
+                return Response({"detail": "quantity must be >= 1"}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response({"detail": "quantity must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        item, created = CartItem.objects.get_or_create(cart=cart, product_id=product_id)
+        if not created:
+            item.quantity += quantity
+        else:
+            item.quantity = quantity
+        item.save()
+
+        serializer = CartItemSerializer(item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    def put(self, request):
+        """
+        Update quantity of a cart item.
+        Expects JSON:
+        {
+            "product_id": "some-product-id",
+            "quantity": 3
+        }
+        """
+        cart = self.get_cart(request.user)
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity')
+
+        if not product_id or quantity is None:
+            return Response({"detail": "product_id and quantity are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            quantity = int(quantity)
+            if quantity < 1:
+                return Response({"detail": "quantity must be >= 1"}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response({"detail": "quantity must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            item = CartItem.objects.get(cart=cart, product_id=product_id)
+        except CartItem.DoesNotExist:
+            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+
+        item.quantity = quantity
+        item.save()
+        serializer = CartItemSerializer(item)
+        return Response(serializer.data)
+
+    def delete(self, request):
+        """
+        Remove item from cart.
+        Expects JSON:
+        {
+            "product_id": "some-product-id"
+        }
+        """
+        cart = self.get_cart(request.user)
+        product_id = request.data.get('product_id')
+
+        if not product_id:
+            return Response({"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            item = CartItem.objects.get(cart=cart, product_id=product_id)
+        except CartItem.DoesNotExist:
+            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+
+        item.delete()
+        return Response({"detail": "Item removed"}, status=status.HTTP_204_NO_CONTENT)

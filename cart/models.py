@@ -1,3 +1,26 @@
-from django.db import models
+# cart/models.py
 
-# Create your models here.
+from mongoengine import Document, ReferenceField, IntField, DateTimeField, CASCADE, StringField
+from datetime import datetime
+from django.conf import settings
+from products.models import Product  # MongoEngine Document
+
+class Cart(Document):
+    user_id = StringField(required=True)  # store user ID as string
+    created_at = DateTimeField(default=datetime.utcnow)
+    updated_at = DateTimeField(default=datetime.utcnow)
+
+    def __str__(self):
+        return f"Cart {self.id} for user {self.user_id}"
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.utcnow()
+        return super().save(*args, **kwargs)
+
+class CartItem(Document):
+    cart = ReferenceField(Cart, reverse_delete_rule=CASCADE)
+    product = ReferenceField(Product, reverse_delete_rule=CASCADE)
+    quantity = IntField(default=1, min_value=1)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.product_name}"

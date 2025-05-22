@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-igx(5#w8+xa)8@8p7-(s_kj5c0x8qj)3_&!9i2pds-08^+u2z&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.herokuapp.com']
 
 
 # Application definition
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_mongoengine',
+    'django_mongoengine.mongo_admin',
     
     # Custom apps
     'users',
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
     'payments',
     'discounts',
     'reviews',
-    'data_loader',
     'authentication',
 ]
 
@@ -84,10 +85,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASES = {}
+
+
+# MongoDB connection for django_mongoengine
+MONGODB_DATABASES = {
+    "default": {
+        "name": "website",
+        "host": "mongodb://localhost:27017/website",
     }
 }
 
@@ -127,6 +132,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

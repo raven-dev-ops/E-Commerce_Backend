@@ -1,3 +1,44 @@
-from django.db import models
+# orders/models.py
 
-# Create your models here.
+from mongoengine import Document, EmbeddedDocument, fields
+from discounts.models import Discount
+from authentication.models import Address
+
+class CartItem(EmbeddedDocument):
+    product_id = fields.StringField(required=True)  # Store MongoDB ObjectId as string
+    quantity = fields.IntField(required=True, min_value=1)
+
+class Cart(Document):
+    user = fields.IntField(required=True)  # Django user ID
+    items = fields.ListField(fields.EmbeddedDocumentField(CartItem))
+    discount = fields.ReferenceField(Discount, null=True, required=False)
+
+ORDER_STATUS_CHOICES = [
+    ('pending', 'Pending Payment'),
+    ('processing', 'Processing'),
+    ('shipped', 'Shipped'),
+    ('delivered', 'Delivered'),
+    ('canceled', 'Canceled'),
+    ('failed', 'Payment Failed'),
+]
+
+class OrderItem(EmbeddedDocument):
+    product_id = fields.StringField(required=True)  # Store MongoDB ObjectId as string
+    quantity = fields.IntField(required=True, min_value=1)
+
+class Order(Document):
+    user = fields.IntField(required=True)  # Django user ID
+    created_at = fields.DateTimeField(required=True)
+    total_price = fields.DecimalField(required=True, precision=2)
+    shipping_cost = fields.DecimalField(default=0.0, precision=2)
+    tax_amount = fields.DecimalField(default=0.0, precision=2)
+    payment_intent_id = fields.StringField()  # Stripe PaymentIntent ID
+    status = fields.StringField(choices=ORDER_STATUS_CHOICES, default='pending')
+    shipping_address = fields.ReferenceField(Address, required=False, null=True)
+    billing_address = fields.ReferenceField(Address, required=False, null=True)
+    discount_code = fields.StringField(null=True)
+    shipped_date = fields.DateTimeField(null=True)
+    discount_type = fields.StringField(choices=['percentage', 'fixed'], null=True)
+    discount_value = fields.FloatField(null=True)
+    discount_amount = fields.FloatField(null=True)
+    items = fields.ListField(fields.EmbeddedDocumentField(OrderItem))
