@@ -1,10 +1,14 @@
-from django.urls import path
-from .views import LoginView, UserRegistrationView, UserProfileView, AddressViewSet
+# authentication/urls.py
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AddressViewSet, UserRegistrationView, LoginView
+
+router = DefaultRouter()
+router.register(r'addresses', AddressViewSet, basename='address')
 
 urlpatterns = [
-    path('login/', LoginView.as_view(), name='login'),
     path('register/', UserRegistrationView.as_view(), name='register'),
-    path('profile/', UserProfileView.as_view(), name='profile'),
-    path('addresses/', AddressViewSet.as_view({'get': 'list', 'post': 'create'}), name='address-list'),
-    path('addresses/<str:pk>/', AddressViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='address-detail'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('', include(router.urls)),
 ]

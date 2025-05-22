@@ -14,7 +14,7 @@ from authentication.serializers import (
     UserProfileSerializer,
     AddressSerializer,
 )
-from authentication.models import Address  # Adjust as needed
+from authentication.models import Address
 
 
 class UserRegistrationView(APIView):
@@ -35,11 +35,13 @@ class LoginView(APIView):
         if user is not None:
             token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserProfileSerializer(user)
+            logging.info(f"User '{user.email}' logged in.")
             return Response({
                 "user": user_serializer.data,
-                "tokens": {"access": token.key}  # Return the token string, not object
+                "tokens": {"access": token.key}
             }, status=status.HTTP_200_OK)
 
+        logging.warning(f"Failed login attempt for email: {email}")
         return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -71,19 +73,20 @@ class AddressViewSet(
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Address.objects(user=self.request.user.id)
+        return Address.objects.filter(user=self.request.user)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
     def perform_create(self, serializer):
         user = self.request.user
         data = self.request.data
 
-        # Unset other default shipping addresses if this is default
         if data.get('is_default_shipping'):
-            Address.objects(user=user.id, is_default_shipping=True).update(set__is_default_shipping=False)
+            Address.objects.filter(user=user, is_default_shipping=True).update(is_default_shipping=False)
 
-        # Unset other default billing addresses if this is default
         if data.get('is_default_billing'):
-            Address.objects(user=user.id, is_default_billing=True).update(set__is_default_billing=False)
+            Address.objects.filter(user=user, is_default_billing=True).update(is_default_billing=False)
 
         serializer.save(user=user)
 
@@ -92,10 +95,10 @@ class AddressViewSet(
         validated_data = serializer.validated_data
 
         if validated_data.get('is_default_shipping'):
-            Address.objects(user=user.id, is_default_shipping=True).update(set__is_default_shipping=False)
+            Address.objects.filter(user=user, is_default_shipping=True).exclude(id=serializer.instance.id).update(is_default_shipping=False)
 
         if validated_data.get('is_default_billing'):
-            Address.objects(user=user.id, is_default_billing=True).update(set__is_default_billing=False)
+            Address.objects.filter(user=user, is_default_billing=True).exclude(id=serializer.instance.id).update(is_default_billing=False)
 
         serializer.save()
 
