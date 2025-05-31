@@ -22,6 +22,14 @@ class Product(Document):
     average_rating = FloatField(default=0.0)
     review_count = IntField(default=0)
 
+    meta = {
+        'indexes': [
+            'category',
+            'tags',
+            'product_name',
+        ]
+    }
+
     def __str__(self):
         return self.product_name
 
