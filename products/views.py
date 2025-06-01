@@ -29,7 +29,7 @@ class ProductViewSet(mixins.ListModelMixin,
         try:
             return Product.objects.get(id=ObjectId(pk))
         except Product.DoesNotExist:
- Http404
+            raise Http404
         except Exception as e:
             # Optional: log or handle invalid ObjectId errors
             raise Http404
@@ -43,10 +43,11 @@ class ProductViewSet(mixins.ListModelMixin,
             if field_name in filter_params:
                 filter_kwargs = {f'{field_name}__{lookup_expr}': filter_params[field_name]}
                 queryset = queryset.filter(**filter_kwargs)
- return queryset # Added return statement
 
- def perform_create(self, serializer):
- serializer.save()
+        return queryset # Added return statement
+
+    def perform_create(self, serializer):
+        serializer.save()
 
     def perform_update(self, serializer):
- serializer.save()
+        serializer.save()
