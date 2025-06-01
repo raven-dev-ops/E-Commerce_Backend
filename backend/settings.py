@@ -123,5 +123,38 @@ CORS_ALLOWED_ORIGINS = ["https://twiinz-beard-frontend.netlify.app"]
 # Optional: Allow all for development
 # CORS_ALLOW_ALL_ORIGINS = True  # Only use this for testing!
 
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'ERROR',  # Set the minimum logging level to ERROR
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',  # You can set this to INFO or DEBUG for more detailed Django logs
+            'propagate': False,
+        },
+        'your_app_name': {  # Replace 'your_app_name' with the name of your application(s) if you want specific app logging
+            'handlers': ['console'],
+            'level': 'ERROR', # Or INFO/DEBUG for more verbosity
+            'propagate': False,
+        },
+        'mongoengine': {  # Optional: Log mongoengine activity
+            'handlers': ['console'],
+            'level': 'ERROR', # Or INFO/DEBUG
+            'propagate': False,
+        },
+        # Add other loggers as needed
+    },
+}
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
