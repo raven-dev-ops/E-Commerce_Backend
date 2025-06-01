@@ -45,6 +45,7 @@ class ProductViewSet(mixins.ListModelMixin,
         #     if field_name in filter_params:
         #         filter_kwargs = {f'{field_name}__{lookup_expr}': filter_params[field_name]}
         #         queryset = queryset.filter(**filter_kwargs)
+        return queryset
         logging.info(f"Filtered queryset length: {len(queryset)}")
 
     def perform_create(self, serializer):
