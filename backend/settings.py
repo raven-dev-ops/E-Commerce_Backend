@@ -27,8 +27,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    'corsheaders',  # CORS support
-
+    'corsheaders',
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
@@ -43,18 +42,6 @@ INSTALLED_APPS = [
 ]
 
 SITE_ID = 1
-
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',                # CORS
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'allauth.account.middleware.AccountMiddleware',         # allauth required
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
 
 AUTHENTICATION_BACKENDS = [
     'authentication.backends.MongoEngineBackend',
@@ -71,14 +58,12 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Silence deprecation warnings (see: dj-rest-auth / allauth)
-ACCOUNT_SIGNUP_FIELDS = {
-    'username': {'required': False},
-    'email': {'required': True},
+# Key line to fix the token model error for MongoEngine/no-migrate setup:
+REST_USE_JWT = False
+DJREST_AUTH = {
+    "TOKEN_MODEL": None,
 }
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
+REST_FRAMEWORK = {}
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -130,11 +115,21 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CORS_ALLOWED_ORIGINS = [
-    "https://twiinz-beard-frontend.netlify.app"
-]
-
+# CORS
+CORS_ALLOWED_ORIGINS = ["https://twiinz-beard-frontend.netlify.app"]
 CORS_ALLOW_CREDENTIALS = True
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 LOGGING = {
     'version': 1,
@@ -168,4 +163,3 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
