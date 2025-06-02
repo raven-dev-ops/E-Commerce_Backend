@@ -1,10 +1,12 @@
 # backend/settings.py
 
+"""
+Django settings for backend project.
+"""
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
-REST_AUTH_TOKEN_MODEL = None  # <-- MUST BE FIRST DJANGO SETTING
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -14,6 +16,7 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 INSTALLED_APPS = [
+    # Django core apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Auth/social
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -29,10 +33,11 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    'corsheaders',
+    # Third-party
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
+    # Local apps
     'users',
     'products',
     'orders',
@@ -46,7 +51,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',
+    'authentication.backends.MongoEngineBackend',  # Your custom backend
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
@@ -110,23 +115,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['*']
-CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app"
-]
-
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 LOGGING = {
@@ -161,3 +151,17 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# === REST framework & JWT config for MongoEngine (NO SQL token model) ===
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+}
+
+REST_USE_JWT = True
+REST_AUTH_TOKEN_MODEL = None   # Explicitly disables SQL token model
