@@ -169,4 +169,4 @@ REST_FRAMEWORK = {
 
 # Enable JWT with dj-rest-auth
 REST_USE_JWT = True
-REST_AUTH_TOKEN_MODEL = None   # Explicitly disables SQL token model
+REST_AUTH_TOKEN_MODEL = None
