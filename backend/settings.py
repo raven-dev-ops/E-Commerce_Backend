@@ -11,16 +11,13 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
-# Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-...')
 DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
-# Installed apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -28,6 +25,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Social/auth-related
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 
     # Third-party
     'django_mongoengine',
@@ -44,26 +50,25 @@ INSTALLED_APPS = [
     'authentication',
 ]
 
-# Middleware
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+SITE_ID = 1
 
-# Authentication
 AUTHENTICATION_BACKENDS = [
     'authentication.backends.MongoEngineBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+            'key': ''
+        }
+    }
+}
 
 ROOT_URLCONF = 'backend.urls'
 
-# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,7 +87,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# MongoDB (using django-mongoengine)
 DATABASES = {}
 MONGO_URI = os.getenv('MONGO_URI')
 MONGODB_DATABASES = {
@@ -92,14 +96,12 @@ MONGODB_DATABASES = {
     }
 }
 
-# Stripe
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 if not STRIPE_SECRET_KEY or not STRIPE_WEBHOOK_SECRET:
     raise ValueError("Stripe keys are not set in environment variables")
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -107,23 +109,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Localization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# CORS settings
 CORS_ALLOWED_ORIGINS = ["https://twiinz-beard-frontend.netlify.app"]
 
-# Optional: Allow all for development
-# CORS_ALLOW_ALL_ORIGINS = True  # Only use this for testing!
-
-# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -134,27 +129,25 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',  # Set the minimum logging level to INFO
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',  # You can set this to INFO or DEBUG for more detailed Django logs
+            'level': 'INFO',
             'propagate': False,
         },
-        'products.views': {  # Logger for products.views
+        'products.views': {
             'handlers': ['console'],
-            'level': 'INFO', # Set level to INFO
+            'level': 'INFO',
             'propagate': False,
         },
-        'mongoengine': {  # Optional: Log mongoengine activity
+        'mongoengine': {
             'handlers': ['console'],
-            'level': 'INFO', # Or INFO/DEBUG
+            'level': 'INFO',
             'propagate': False,
         },
-        # Add other loggers as needed
     },
 }
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

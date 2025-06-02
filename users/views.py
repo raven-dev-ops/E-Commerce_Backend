@@ -3,6 +3,7 @@
 from rest_framework import generics, permissions
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer, CharField
+from django.shortcuts import redirect
 
 User = get_user_model()
 
@@ -40,3 +41,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+# Google login redirect shortcut
+def google_login_redirect(request):
+    return redirect('/users/auth/social/login/google/')
