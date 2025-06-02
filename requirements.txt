@@ -28,3 +28,4 @@ tzdata==2025.2
 urllib3==2.4.0
 django-allauth==65.9.0
 dj-rest-auth==7.0.1
+cryptography>=41.0.0
