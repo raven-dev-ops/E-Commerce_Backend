@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-REST_AUTH_TOKEN_MODEL = None  # <- FIRST Django-related setting
+REST_AUTH_TOKEN_MODEL = None  # <-- MUST BE FIRST DJANGO SETTING
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
