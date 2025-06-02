@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Social/auth-related
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -27,10 +28,12 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
+    # Third-party
     'corsheaders',
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
+    # Local apps
     'users',
     'products',
     'orders',
@@ -40,6 +43,8 @@ INSTALLED_APPS = [
     'reviews',
     'authentication',
 ]
+
+REST_AUTH_TOKEN_MODEL = None  # Prevents token model requirement for dj-rest-auth
 
 SITE_ID = 1
 
@@ -57,13 +62,6 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
-# Key line to fix the token model error for MongoEngine/no-migrate setup:
-REST_USE_JWT = False
-DJREST_AUTH = {
-    "TOKEN_MODEL": None,
-}
-REST_FRAMEWORK = {}
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -115,9 +113,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# CORS
-CORS_ALLOWED_ORIGINS = ["https://twiinz-beard-frontend.netlify.app"]
+# CORS settings
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['*']
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+CORS_ALLOWED_ORIGINS = [
+    "https://twiinz-beard-frontend.netlify.app"
+]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
