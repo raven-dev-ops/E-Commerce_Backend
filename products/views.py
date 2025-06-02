@@ -32,7 +32,6 @@ class ProductViewSet(mixins.ListModelMixin,
         except Product.DoesNotExist:
             raise Http404
         except Exception as e:
-            # Optional: log or handle invalid ObjectId errors
             raise Http404
 
     def get_queryset(self):
