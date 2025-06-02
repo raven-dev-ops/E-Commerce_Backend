@@ -33,7 +33,10 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    # Third-party
+    # REST Framework (no authtoken)
+    'rest_framework',
+
+    # Third-party (MongoEngine)
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
@@ -85,6 +88,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+# Database (MongoDB only)
 DATABASES = {}
 MONGO_URI = os.getenv('MONGO_URI')
 MONGODB_DATABASES = {
@@ -152,7 +156,7 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# === REST framework & JWT config for MongoEngine (NO SQL token model) ===
+# ==== REST framework & JWT config for MongoDB (NO SQL token model) ====
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -163,5 +167,8 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Enable JWT with dj-rest-auth
 REST_USE_JWT = True
-REST_AUTH_TOKEN_MODEL = None   # Explicitly disables SQL token model
+
+# Tell dj-rest-auth NOT to expect a token model (critical for MongoDB/MongoEngine)
+REST_AUTH_TOKEN_MODEL = None
