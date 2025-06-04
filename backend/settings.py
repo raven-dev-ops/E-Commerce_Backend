@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
+
     'dj_rest_auth.registration',
 
     # REST Framework (no authtoken)
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'discounts',
     'reviews',
     'authentication',
+    'corsheaders',
 ]
 
 SITE_ID = 1
@@ -67,6 +69,15 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',]
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -120,7 +131,8 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://twiinz-beard-frontend.netlify.app"
+    "https://twiinz-beard-frontend.netlify.app",
+    "http://localhost:3000",
 ]
 
 LOGGING = {
