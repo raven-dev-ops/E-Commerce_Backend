@@ -18,4 +18,4 @@ urlpatterns = [
     path('discounts/', include('discounts.urls')),
     path('reviews/', include('reviews.urls')),
     path('authentication/', include('authentication.urls')),
-]
+    path('accounts/', include('allauth.urls')),
