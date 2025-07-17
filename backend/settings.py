@@ -68,14 +68,16 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# --- dj-rest-auth & allauth NEW SIGNUP_FIELDS config ---
-from dj_rest_auth.registration.app_settings import app_settings as reg_app_settings
+# -- Modern allauth/dj-rest-auth registration config --
+ACCOUNT_USERNAME_REQUIRED = True  # Set False if you want to disable username
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # Or "email" if using email as username
+ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
 
-reg_app_settings.SIGNUP_FIELDS = {
-    "username": {"required": True},  # Set to False if you do not require username
-    "email": {"required": True},     # Set to False to allow optional email (not recommended)
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
 }
-# ------------------------------------------------------
+# -----------------------------------------------------
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
