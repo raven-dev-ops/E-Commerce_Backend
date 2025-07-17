@@ -148,7 +148,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
-    "http://localhost:3000",
+    "http://localhost:27017",
 ]
 
 LOGGING = {
