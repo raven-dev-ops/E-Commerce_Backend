@@ -14,6 +14,6 @@ urlpatterns = [
     # Registration endpoints (email verification, signup, etc.)
     path('auth/', include('dj_rest_auth.registration.urls')),
 
-    # ✅ Google social login endpoint
+    # ✅ Custom Google social login endpoint
     path('auth/google/', CustomGoogleLogin.as_view(), name='google_login'),
 ]
