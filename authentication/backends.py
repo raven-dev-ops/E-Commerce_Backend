@@ -1,5 +1,3 @@
-# authentication/backends.py
-
 from django.contrib.auth.backends import BaseBackend
 from authentication.models import User
 

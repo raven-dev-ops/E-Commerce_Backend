@@ -11,7 +11,6 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = getattr(sociallogin.account, "user", None)
 
         if not user or not user_email(user):
-            # Prevent crash when user object is missing
             raise ImmediateHttpResponse(JsonResponse(
                 {"error": "Social account is not linked to a valid user."},
                 status=400
@@ -23,5 +22,4 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             existing_user = User.objects.get(email=email)
             sociallogin.connect(request, existing_user)
         except User.DoesNotExist:
-            # Continue with normal signup flow
-            pass
+            pass  # Proceed with normal signup
