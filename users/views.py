@@ -1,24 +1,23 @@
 from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
-from django.contrib.auth import get_user_model
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-import logging
 
-logger = logging.getLogger(__name__)
-User = get_user_model()
+def get_user_model_ref():
+    from django.contrib.auth import get_user_model
+    return get_user_model()
 
 class UserSerializer(ModelSerializer):
     password = CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model_ref()
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User(**validated_data)
+        user = get_user_model_ref()(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -33,7 +32,7 @@ class UserSerializer(ModelSerializer):
         return instance
 
 class RegisterUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = get_user_model_ref().objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -46,9 +45,5 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "https://twiinz-beard-frontend.netlify.app"  # ✅ ensure this matches Google's OAuth settings
+    callback_url = "https://twiinz-beard-frontend.netlify.app"
     client_class = OAuth2Client
-
-    def post(self, request, *args, **kwargs):
-        logger.info("🔐 Google login requested")
-        return super().post(request, *args, **kwargs)
