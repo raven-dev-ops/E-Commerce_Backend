@@ -1,13 +1,11 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer, CharField
 from django.shortcuts import redirect
-
-from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from rest_framework.response import Response
-from rest_framework import status
+from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.exceptions import ValidationError
 import logging
 
@@ -48,7 +46,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-# ✅ Custom Google social login view
+# ✅ Google login with fallback to user creation
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
@@ -57,18 +55,27 @@ class CustomGoogleLogin(SocialLoginView):
         try:
             return super().post(request, *args, **kwargs)
         except ValidationError as e:
-            detail = e.detail.get('non_field_errors')
-            if detail and "already registered" in str(detail[0]).lower():
-                logging.warning("User already exists, attempting fallback login.")
-                return self._handle_existing_user_login(request)
+            errors = e.detail.get('non_field_errors', [])
+            if errors and any("already registered" in str(err).lower() for err in errors):
+                logging.warning("User already exists. Attempting login only.")
+                return self._login_existing_user(request)
+            elif errors and any("No user" in str(err) or "Unable to" in str(err) for err in errors):
+                logging.info("No user found. Attempting auto-creation.")
+                return self._create_new_user(request)
             raise e
 
-    def _handle_existing_user_login(self, request):
+    def _login_existing_user(self, request):
         self.serializer = self.get_serializer(data=request.data)
         self.serializer.is_valid(raise_exception=True)
         self.login()
         return Response(self.get_response_data(), status=status.HTTP_200_OK)
 
-# Optional: redirect fallback
+    def _create_new_user(self, request):
+        self.serializer = self.get_serializer(data=request.data)
+        self.serializer.is_valid(raise_exception=True)
+        self.complete_social_login(self.request, self.serializer.validated_data['access_token'])
+        self.login()
+        return Response(self.get_response_data(), status=status.HTTP_201_CREATED)
+
 def google_login_redirect(request):
-    return redirect('/users/auth/google/login/')
+    return redirect('/users/auth/social/login/google/')
