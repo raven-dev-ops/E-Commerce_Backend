@@ -12,16 +12,16 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 INSTALLED_APPS = [
-    # Removed default Django apps using relational DB
-    # 'django.contrib.admin',
-    # 'django.contrib.auth',
-    # 'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
-    # 'django.contrib.messages',
-    # 'django.contrib.staticfiles',
-    # 'django.contrib.sites',
+    # Django core
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.sites',
 
-    # Only include apps that support MongoEngine or are non-relational
+    # Third-party
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
+    # Local apps
     'users',
     'products',
     'orders',
@@ -79,15 +80,21 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# Allauth modern config
 ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_LOGIN_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # ✅ Required middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -101,6 +108,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -108,24 +117,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# REMOVE default relational database setup
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
-# Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
-connect(
-    db="website",
-    host=MONGO_URI,
-)
+MONGODB_DATABASES = {
+    "default": {
+        "name": "website",
+        "host": MONGO_URI,
+    }
+}
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
-
 if not STRIPE_SECRET_KEY or not STRIPE_WEBHOOK_SECRET:
     raise ValueError("Stripe keys are not set in environment variables")
 
@@ -187,5 +195,6 @@ REST_FRAMEWORK = {
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
 
+# Suppress deprecation warnings
 warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
 warnings.filterwarnings('ignore', message="app_settings.EMAIL_REQUIRED is deprecated")
