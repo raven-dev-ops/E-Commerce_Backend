@@ -49,3 +49,9 @@ class CustomGoogleLogin(SocialLoginView):
 
     def get_callback_url(self):
         return "https://twiinz-beard-frontend.netlify.app"
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['callback_url'] = self.get_callback_url()
+        return context
+
