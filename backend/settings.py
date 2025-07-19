@@ -159,6 +159,8 @@ STATICFILES_DIRS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+SOCIALACCOUNT_ADAPTER = "authentication.adapters.CustomSocialAccountAdapter"
+
 CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
     "http://localhost:3000",
