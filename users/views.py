@@ -47,4 +47,4 @@ class CustomGoogleLogin(SocialLoginView):
     client_class = OAuth2Client  # ✅ Needed for correct OAuth flow
 
     def get_callback_url(self):
-        return "https://twiinz-beard-frontend.netlify.app"  # ✅ Must match redirect URI in Google settings
+        return "https://twiinz-beard-frontend.netlify.app"
