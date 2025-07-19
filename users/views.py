@@ -1,27 +1,24 @@
+from functools import partial
 from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
-from django.contrib.auth import get_user_model
-
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
-# Get the user model dynamically
-User = get_user_model()
-
-# -------------------------
-# Serializers
-# -------------------------
+def get_user_model_ref():
+    from django.contrib.auth import get_user_model
+    return get_user_model()
 
 class UserSerializer(ModelSerializer):
     password = CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model_ref()
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User(**validated_data)
+        user = get_user_model_ref()(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -35,12 +32,8 @@ class UserSerializer(ModelSerializer):
         instance.save()
         return instance
 
-# -------------------------
-# Views
-# -------------------------
-
 class RegisterUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = get_user_model_ref().objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -53,4 +46,6 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
+    # partial ensures extra arguments don't conflict
+    client_class = partial(OAuth2Client, scope_delimiter=" ")
     callback_url = "https://twiinz-beard-frontend.netlify.app"
