@@ -44,7 +44,5 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client  # ✅ Needed for correct OAuth flow
-
-    def get_callback_url(self):
-        return "https://twiinz-beard-backend-11dfd7158830.herokuapp.com/accounts/google/login/callback/"
+    client_class = OAuth2Client
+    callback_url = "https://twiinz-beard-backend-11dfd7158830.herokuapp.com/accounts/google/login/callback/"
