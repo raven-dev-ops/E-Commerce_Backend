@@ -1,24 +1,27 @@
 from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from dj_rest_auth.registration.views import SocialLoginView
-from django.conf import settings
+from django.contrib.auth import get_user_model
 
-def get_user_model_ref():
-    from django.contrib.auth import get_user_model
-    return get_user_model()
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from dj_rest_auth.registration.views import SocialLoginView
+
+# Get the user model dynamically
+User = get_user_model()
+
+# -------------------------
+# Serializers
+# -------------------------
 
 class UserSerializer(ModelSerializer):
     password = CharField(write_only=True)
 
     class Meta:
-        model = get_user_model_ref()
+        model = User
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = get_user_model_ref()(**validated_data)
+        user = User(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -32,8 +35,12 @@ class UserSerializer(ModelSerializer):
         instance.save()
         return instance
 
+# -------------------------
+# Views
+# -------------------------
+
 class RegisterUserView(generics.CreateAPIView):
-    queryset = get_user_model_ref().objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -46,5 +53,4 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client
-    callback_url = "https://twiinz-beard-frontend.netlify.app/auth/callback/"
+    callback_url = "https://twiinz-beard-frontend.netlify.app"
