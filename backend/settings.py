@@ -86,12 +86,11 @@ ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
 ACCOUNT_LOGIN_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # ✅ Required middleware
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -148,6 +147,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+# ✅ CSRF Trusted Origins (required for admin login in production)
+CSRF_TRUSTED_ORIGINS = [
+    "https://twiinz-beard-frontend.netlify.app",
+    "https://twiinz-beard-backend-11dfd7158830.herokuapp.com",
+]
 
 LOGGING = {
     'version': 1,
