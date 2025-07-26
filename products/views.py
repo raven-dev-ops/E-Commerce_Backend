@@ -1,6 +1,4 @@
-# products/views.py
-
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from products.models import Product
 from products.serializers import ProductSerializer
@@ -24,26 +22,28 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
-    lookup_field = 'id'  # DRF will look for 'id' in the URL
-
-    def get_object(self):
-        pk = self.kwargs.get(self.lookup_field)
-        logging.info(f"Looking up Product with id: {pk}")
-        try:
-            return Product.objects.get(id=pk)  # For string-based IDs
-        except Product.DoesNotExist:
-            logging.error(f"Product with id {pk} not found")
-            raise Http404
-        except Exception as e:
-            logging.error(f"Error retrieving product: {e}")
-            raise Http404
+    lookup_field = 'id'
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        logging.info(f"Queryset object: Type={type(queryset)}, Representation={repr(queryset)}")
-        logging.info(f"Raw PyMongo query: {queryset._query}")
-        logging.info(f"Initial queryset length: {len(queryset)}")
+        # Logging all IDs that will be served in this queryset
+        ids = [str(p.id) for p in queryset]
+        logging.info(f"[ProductViewSet] Serving {len(ids)} products. Product IDs: {ids}")
         return queryset
+
+    def get_object(self):
+        pk = self.kwargs.get(self.lookup_field)
+        logging.info(f"[ProductViewSet] Attempting to serve detail for Product id: {pk}")
+        try:
+            product = Product.objects.get(id=pk)
+            logging.info(f"[ProductViewSet] Found Product with id: {pk}")
+            return product
+        except Product.DoesNotExist:
+            logging.error(f"[ProductViewSet] Product with id {pk} not found")
+            raise Http404
+        except Exception as e:
+            logging.error(f"[ProductViewSet] Error retrieving product: {e}")
+            raise Http404
 
     def perform_create(self, serializer):
         serializer.save()
