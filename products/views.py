@@ -1,3 +1,5 @@
+# products/views.py
+
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from products.models import Product
@@ -22,28 +24,27 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
-    lookup_field = 'id'
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        # Logging all IDs that will be served in this queryset
-        ids = [str(p.id) for p in queryset]
-        logging.info(f"[ProductViewSet] Serving {len(ids)} products. Product IDs: {ids}")
-        return queryset
+    lookup_field = '_id'  # Use '_id' for MongoDB string primary key
 
     def get_object(self):
         pk = self.kwargs.get(self.lookup_field)
-        logging.info(f"[ProductViewSet] Attempting to serve detail for Product id: {pk}")
+        logging.info(f"[ProductViewSet] Attempting to serve detail for Product _id: {pk}")
         try:
-            product = Product.objects.get(id=pk)
-            logging.info(f"[ProductViewSet] Found Product with id: {pk}")
-            return product
+            # Always query by string _id, NOT id (which might try to coerce to ObjectId)
+            return Product.objects.get(_id=str(pk))
         except Product.DoesNotExist:
-            logging.error(f"[ProductViewSet] Product with id {pk} not found")
+            logging.error(f"[ProductViewSet] Product with _id {pk} not found")
             raise Http404
         except Exception as e:
             logging.error(f"[ProductViewSet] Error retrieving product: {e}")
             raise Http404
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        # Log all product IDs
+        ids = [str(prod._id) for prod in queryset]
+        logging.info(f"[ProductViewSet] Serving {len(ids)} products. Product IDs: {ids}")
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save()

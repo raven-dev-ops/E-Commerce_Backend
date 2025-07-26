@@ -1,10 +1,9 @@
 from rest_framework_mongoengine.serializers import DocumentSerializer
-from rest_framework import serializers
 from products.models import Product
 
 class ProductSerializer(DocumentSerializer):
-    id = serializers.CharField(read_only=True)  
-    _id = serializers.SerializerMethodField()   
+    # Expose _id as a string for the frontend
+    _id = serializers.CharField(read_only=True)
 
     product_name = serializers.CharField(max_length=255)
     category = serializers.CharField(max_length=100)
@@ -25,9 +24,26 @@ class ProductSerializer(DocumentSerializer):
     average_rating = serializers.FloatField(read_only=True)
     review_count = serializers.IntegerField(read_only=True)
 
-    def get__id(self, obj):
-        return str(obj.id)
-
     class Meta:
-        model = Product        
-        fields = '__all__'    
+        model = Product
+        fields = [
+            '_id',
+            'product_name',
+            'category',
+            'description',
+            'price',
+            'ingredients',
+            'images',
+            'variations',
+            'weight',
+            'dimensions',
+            'benefits',
+            'scent_profile',
+            'variants',
+            'tags',
+            'availability',
+            'inventory',
+            'reserved_inventory',
+            'average_rating',
+            'review_count',
+        ]

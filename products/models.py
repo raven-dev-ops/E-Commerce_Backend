@@ -4,6 +4,8 @@ from mongoengine import (
 )
 
 class Product(Document):
+    # MongoEngine auto-generates _id (string, not ObjectId, unless you override)
+    _id = StringField(primary_key=True)  # <-- This ensures always string, not ObjectId!
     product_name = StringField(max_length=255)
     category = StringField(max_length=100)
     description = StringField()
@@ -36,8 +38,7 @@ class Product(Document):
 
     @property
     def id_str(self):
-        """Returns the _id as a string, regardless of its internal type."""
-        return str(self.id)  # self.id is ObjectId by default unless you override
+        return str(self._id)  # Always string
 
 class Category(Document):
     name = StringField(max_length=100, required=True, unique=True)
