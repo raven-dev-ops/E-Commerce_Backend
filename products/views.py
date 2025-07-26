@@ -24,13 +24,12 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
-    lookup_field = 'id'
+    lookup_field = 'id'  # <- Critical for DRF to use ?id=<id> in URL
 
     def get_object(self):
-        pk = self.kwargs.get('pk')
+        pk = self.kwargs.get(self.lookup_field)  # This will use 'id'
         logging.info(f"Looking up Product with id: {pk}")
         try:
-            # If _id is always a string in your DB, this is enough!
             return Product.objects.get(id=pk)
         except Product.DoesNotExist:
             logging.error(f"Product with id {pk} not found")
