@@ -150,11 +150,11 @@ if not DATABASE_URL:
         }
     }
 
-MONGO_URI = os.getenv('MONGO_URI')
+MONGODB_URI = os.getenv('MONGODB_URI')
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
-        "host": MONGO_URI,
+        "host": MONGODB_URI,
     }
 }
 
