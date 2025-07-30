@@ -6,15 +6,29 @@ from products.models import Product
 from django.contrib.auth import get_user_model
 from reviews.serializers import ReviewSerializer
 from datetime import datetime
+from mongoengine import connect, disconnect
+import mongomock
+import uuid
 
 User = get_user_model()
 
 class ReviewModelSerializerTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        connect('mongoenginetest', host='mongodb://localhost', mongo_client_class=mongomock.MongoClient)
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
     def setUp(self):
         # Create a test user
         self.user = User.objects.create_user(username='testuser', password='password')
         # Create a test product
         self.product = Product.objects.create(
+            _id=uuid.uuid4().hex,
             product_name="Test Product",
             category="Test Category",
             description="Test description",

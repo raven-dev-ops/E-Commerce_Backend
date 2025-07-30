@@ -4,20 +4,33 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from products.models import Product
 from .models import Cart, CartItem
+from mongoengine import connect, disconnect
+import mongomock
+import uuid
 
 User = get_user_model()
 
 class CartModelTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        connect('mongoenginetest', host='mongodb://localhost', mongo_client_class=mongomock.MongoClient)
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='pass123')
-        self.product = Product.objects.create(name='Test Product', price=10.00)
-        self.cart = Cart.objects.create(user=self.user)
+        self.product = Product.objects.create(_id=uuid.uuid4().hex, product_name='Test Product', price=10.00)
+        self.cart = Cart.objects.create(user_id=str(self.user.id))
 
     def test_cart_creation(self):
-        self.assertEqual(str(self.cart), f"Cart {self.cart.id} for {self.user.username}")
+        self.assertEqual(str(self.cart), f"Cart {self.cart.id} for user {self.user.id}")
 
     def test_cart_item_creation(self):
         item = CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
-        self.assertEqual(str(item), f"2 x {self.product.name}")
+        self.assertEqual(str(item), f"2 x {self.product.product_name}")
         self.assertEqual(item.cart, self.cart)
         self.assertEqual(item.product, self.product)

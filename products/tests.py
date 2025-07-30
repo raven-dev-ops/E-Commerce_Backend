@@ -3,10 +3,24 @@
 from django.test import TestCase
 from products.models import Product
 from products.serializers import ProductSerializer
+from mongoengine import connect, disconnect
+import mongomock
+import uuid
 
 class ProductModelSerializerTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        connect('mongoenginetest', host='mongodb://localhost', mongo_client_class=mongomock.MongoClient)
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
     def setUp(self):
         self.product = Product.objects.create(
+            _id=uuid.uuid4().hex,
             product_name="Test Soap",
             category="Bath",
             description="A soothing soap",

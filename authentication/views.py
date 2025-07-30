@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate
 from rest_framework import status, generics, mixins, viewsets
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 import logging
 
 from authentication.serializers import (
@@ -39,12 +39,15 @@ class LoginView(APIView):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
-            token, _ = Token.objects.get_or_create(user=user)
+            tokens = RefreshToken.for_user(user)
             user_serializer = UserProfileSerializer(user)
             logging.info(f"User '{user.email}' logged in.")
             return Response({
                 "user": user_serializer.data,
-                "tokens": {"access": token.key}
+                "tokens": {
+                    "access": str(tokens.access_token),
+                    "refresh": str(tokens)
+                }
             }, status=status.HTTP_200_OK)
 
         logging.warning(f"Failed login attempt for email: {email}")
@@ -52,7 +55,7 @@ class LoginView(APIView):
 
 
 class UserProfileView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -68,7 +71,7 @@ class UserProfileView(APIView):
 
 class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
