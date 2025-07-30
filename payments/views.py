@@ -1,10 +1,13 @@
 # payments/views.py
 
+import logging
 import stripe
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from orders.models import Order  # Assuming your Order model is here
+
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -30,9 +33,11 @@ def stripe_webhook_view(request):
             order = Order.objects.get(payment_intent_id=payment_intent['id'])
             order.status = 'Processing'  # Or 'Completed'
             order.save()
-            print(f'Order {order.id} status updated to Processing')
+            logger.info(f'Order {order.id} status updated to Processing')
         except Order.DoesNotExist:
-            print(f'Order with payment_intent_id {payment_intent["id"]} not found')
+            logger.error(
+                f'Order with payment_intent_id {payment_intent["id"]} not found'
+            )
 
     elif event['type'] == 'payment_intent.payment_failed':
         payment_intent = event['data']['object']
@@ -40,8 +45,10 @@ def stripe_webhook_view(request):
             order = Order.objects.get(payment_intent_id=payment_intent['id'])
             order.status = 'Payment Failed'
             order.save()
-            print(f'Order {order.id} status updated to Payment Failed')
+            logger.info(f'Order {order.id} status updated to Payment Failed')
         except Order.DoesNotExist:
-            print(f'Order with payment_intent_id {payment_intent["id"]} not found')
+            logger.error(
+                f'Order with payment_intent_id {payment_intent["id"]} not found'
+            )
 
     return HttpResponse(status=200)

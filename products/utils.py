@@ -1,7 +1,10 @@
 # products/utils.py
 
+import logging
 from django.core.mail import send_mail
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 def send_low_stock_notification(product_name, product_id, current_stock):
     """
@@ -20,6 +23,10 @@ def send_low_stock_notification(product_name, product_id, current_stock):
 
     try:
         send_mail(subject, message, from_email, recipient_list)
-        print(f"Low stock notification email sent for product: {product_name}") # Optional: for logging success
+        logger.info(
+            f"Low stock notification email sent for product: {product_name}"
+        )
     except Exception as e:
-        print(f"Error sending low stock notification email for product {product_name}: {e}") # Optional: log the error
+        logger.error(
+            f"Error sending low stock notification email for product {product_name}: {e}"
+        )
