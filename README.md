@@ -45,6 +45,22 @@ python manage.py runserver
 ```
 The API will be available at `http://127.0.0.1:8000/`.
 
+## API Documentation
+
+Swagger UI is available once the server is running:
+
+```
+http://127.0.0.1:8000/api/docs/
+```
+
+The raw OpenAPI schema can be retrieved from:
+
+```
+http://127.0.0.1:8000/api/schema/
+```
+
+A ReDoc view is also available at `/api/redoc/`.
+
 ## Running Celery Workers
 
 Asynchronous tasks are handled with Celery. Start a worker with:
