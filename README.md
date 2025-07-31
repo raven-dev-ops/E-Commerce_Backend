@@ -45,6 +45,17 @@ python manage.py runserver
 ```
 The API will be available at `http://127.0.0.1:8000/`.
 
+## Running Celery Workers
+
+Asynchronous tasks are handled with Celery. Start a worker with:
+
+```bash
+celery -A backend worker -l info
+```
+
+Celery uses Redis by default. Configure `CELERY_BROKER_URL` and
+`CELERY_RESULT_BACKEND` in your `.env` file if you need to adjust the connection.
+
 ## Running Tests
 
 Execute the Django test suite with:

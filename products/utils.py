@@ -1,7 +1,7 @@
 # products/utils.py
 
-from django.core.mail import send_mail
 from django.conf import settings
+from .tasks import send_low_stock_email
 
 def send_low_stock_notification(product_name, product_id, current_stock):
     """
@@ -19,7 +19,7 @@ def send_low_stock_notification(product_name, product_id, current_stock):
     recipient_list = [settings.ADMIN_EMAIL] # Make sure ADMIN_EMAIL is set in your settings.py
 
     try:
-        send_mail(subject, message, from_email, recipient_list)
-        print(f"Low stock notification email sent for product: {product_name}") # Optional: for logging success
+        send_low_stock_email.delay(product_name, product_id, current_stock)
+        print(f"Low stock notification task queued for product: {product_name}")
     except Exception as e:
-        print(f"Error sending low stock notification email for product {product_name}: {e}") # Optional: log the error
+        print(f"Error queueing low stock notification for product {product_name}: {e}")
