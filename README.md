@@ -15,7 +15,11 @@ This repository contains a Django and MongoEngine based backend for an example e
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-3. **Create a `.env` file** in the project root and define the following variables (replace placeholder values with your own):
+3. **Create a `.env` file** in the project root. You can start from the included `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+   Then define the following variables (replace placeholder values with your own):
    ```env
    SECRET_KEY=your-django-secret-key
    ALLOWED_HOSTS=localhost,127.0.0.1
