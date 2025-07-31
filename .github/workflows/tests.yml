@@ -1,0 +1,43 @@
+name: Django Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements.txt
+      - name: Run tests
+        env:
+          CI: 'true'
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          MONGODB_URI: mongodb://localhost:27017/testdb
+          MONGO_URI: mongodb://localhost:27017/testdb
+          SECRET_KEY: testsecret
+          STRIPE_SECRET_KEY: dummy
+          STRIPE_WEBHOOK_SECRET: dummy
+        run: python manage.py test

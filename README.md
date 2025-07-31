@@ -34,6 +34,7 @@ This repository contains a Django and MongoEngine based backend for an example e
    FACEBOOK_APP_SECRET=your-facebook-app-secret
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
+   SENTRY_DSN=your-sentry-dsn
    ```
 
 ## Running the Server

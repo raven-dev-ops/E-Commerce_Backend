@@ -5,9 +5,21 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 import warnings
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
+
+# Initialize Sentry for error monitoring if a DSN is provided.
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-...')
 DEBUG = False
