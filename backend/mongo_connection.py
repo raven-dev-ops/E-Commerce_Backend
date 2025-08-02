@@ -26,7 +26,7 @@ def connect_mongodb():
 if __name__ == '__main__':
     # This block is for testing the connection
     connect_mongodb()
-    print("MongoDB connection established successfully.")
+    logger.info("MongoDB connection established successfully.")
     # You can add a small test query here if you have a model defined
     # from your_app.models import YourModel
-    # print(YourModel.objects.first())
+    # logger.info(YourModel.objects.first())

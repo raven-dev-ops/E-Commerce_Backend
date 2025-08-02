@@ -1,7 +1,10 @@
 # products/utils.py
 
 from django.conf import settings
+import logging
 from .tasks import send_low_stock_email
+
+logger = logging.getLogger(__name__)
 
 def send_low_stock_notification(product_name, product_id, current_stock):
     """
@@ -20,6 +23,10 @@ def send_low_stock_notification(product_name, product_id, current_stock):
 
     try:
         send_low_stock_email.delay(product_name, product_id, current_stock)
-        print(f"Low stock notification task queued for product: {product_name}")
+        logger.info("Low stock notification task queued for product: %s", product_name)
     except Exception as e:
-        print(f"Error queueing low stock notification for product {product_name}: {e}")
+        logger.error(
+            "Error queueing low stock notification for product %s: %s",
+            product_name,
+            e,
+        )
