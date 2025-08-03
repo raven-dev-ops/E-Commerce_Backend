@@ -3,6 +3,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse, JsonResponse
+from django.db import connection
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -12,6 +13,15 @@ def home(request):
 
 def custom_404(request, exception=None):
     return JsonResponse({'error': 'Endpoint not found'}, status=404)
+
+
+def health(request):
+    try:
+        connection.ensure_connection()
+        db_status = 'ok'
+    except Exception:
+        db_status = 'unavailable'
+    return JsonResponse({'status': 'ok', 'database': db_status})
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -26,6 +36,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
+    path('health/', health),
     path('users/', include('users.urls')),
     path('products/', include('products.urls')),
     path('orders/', include('orders.urls')),

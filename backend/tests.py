@@ -16,3 +16,11 @@ class SecurityHeadersMiddlewareTest(TestCase):
             response.headers.get('Strict-Transport-Security'),
             'max-age=63072000; includeSubDomains; preload'
         )
+
+
+class HealthEndpointTest(TestCase):
+    def test_health_returns_ok(self):
+        response = self.client.get('/health/', secure=True, HTTP_HOST='localhost')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get('status'), 'ok')
+
