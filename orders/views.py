@@ -6,7 +6,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-import stripe, os
+from django.conf import settings
+import logging
+import stripe
 from .tasks import send_order_confirmation_email
 
 from cart.models import Cart  # MongoEngine
@@ -15,7 +17,7 @@ from products.models import Product  # Django ORM
 from authentication.models import Address  # Django ORM
 from .serializers import OrderSerializer
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+logger = logging.getLogger(__name__)
 
 class OrderViewSet(viewsets.ViewSet):
     """
@@ -105,6 +107,15 @@ class OrderViewSet(viewsets.ViewSet):
             total_price = subtotal + shipping_cost + tax_amount
 
         # Stripe Payment
+        stripe_secret_key = getattr(settings, "STRIPE_SECRET_KEY", None)
+        if not stripe_secret_key:
+            logger.error("STRIPE_SECRET_KEY is not configured")
+            return Response(
+                {"detail": "Stripe configuration error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        stripe.api_key = stripe_secret_key
+
         payment_method_id = request.data.get('payment_method_id')
         if not payment_method_id:
             return Response({"detail": "Payment method required."}, status=400)
