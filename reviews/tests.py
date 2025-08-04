@@ -9,7 +9,9 @@ from products.models import Product
 from django.contrib.auth import get_user_model
 from reviews.serializers import ReviewSerializer
 from rest_framework.test import APIClient
+from rest_framework import status
 from datetime import datetime
+from django.core.cache import cache
 
 User = get_user_model()
 
@@ -130,3 +132,72 @@ class ReviewAPIPaginationTest(TestCase):
         response = self.client.get(url, {"product_id": str(self.product.id), "page": 2})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 5)
+
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ReviewCreationThrottleTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        Review.drop_collection()
+        cache.clear()
+        self.user = User.objects.create_user(
+            username="throttleuser", password="password"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_review_creation_is_throttled(self):
+        url = reverse("review-list")
+
+        for i in range(5):
+            product = Product.objects.create(
+                _id=f"prod{i}",
+                product_name=f"Product {i}",
+                category="Test Category",
+                description="Test description",
+                price=9.99,
+                ingredients=[],
+                benefits=[],
+                tags=[],
+                inventory=10,
+                reserved_inventory=0,
+            )
+            response = self.client.post(
+                url, {"product_id": product.id, "rating": 5}, format="json"
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        product = Product.objects.create(
+            _id="prod-final",
+            product_name="Product final",
+            category="Test Category",
+            description="Test description",
+            price=9.99,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=10,
+            reserved_inventory=0,
+        )
+        response = self.client.post(
+            url, {"product_id": product.id, "rating": 5}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)

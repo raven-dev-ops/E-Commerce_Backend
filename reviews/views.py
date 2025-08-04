@@ -8,6 +8,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 
+from .throttles import ReviewCreateThrottle
+
 from .models import Review
 from products.models import Product
 from .serializers import ReviewSerializer
@@ -22,6 +24,12 @@ class ReviewViewSet(GenericViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = ReviewPagination
+    throttle_classes = [ReviewCreateThrottle]
+
+    def get_throttles(self):
+        if getattr(self, "action", None) == "create":
+            return [throttle() for throttle in self.throttle_classes]
+        return []
 
     def create(self, request):
         user = request.user
