@@ -9,6 +9,7 @@ class ProductSerializer(DocumentSerializer):
     _id = serializers.CharField(read_only=True)
 
     product_name = serializers.CharField(max_length=255)
+    slug = serializers.CharField(read_only=True)
     category = serializers.CharField(max_length=100)
     description = serializers.CharField()
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -36,6 +37,7 @@ class ProductSerializer(DocumentSerializer):
         fields = [
             "_id",
             "product_name",
+            "slug",
             "category",
             "description",
             "price",

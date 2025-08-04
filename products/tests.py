@@ -61,10 +61,26 @@ class ProductModelSerializerTest(TestCase):
         serializer = ProductSerializer(instance=self.product)
         data = serializer.data
         self.assertEqual(data["product_name"], "Test Soap")
+        self.assertEqual(data["slug"], "test-soap")
         self.assertEqual(data["price"], "9.99")  # Decimal serialized as string
         self.assertIn("bath", [tag.lower() for tag in data["tags"]])
         self.assertEqual(data["average_rating"], 4.5)
         self.assertEqual(data["review_count"], 10)
+
+    def test_product_slug_unique(self):
+        second = Product.objects.create(
+            _id="507f1f77bcf86cd799439012",
+            product_name="Test Soap",
+            category="Bath",
+            description="Another soap",
+            price=9.99,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=10,
+            reserved_inventory=0,
+        )
+        self.assertNotEqual(self.product.slug, second.slug)
 
 
 @override_settings(
@@ -117,6 +133,7 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["product_name"], "API Soap")
+        self.assertEqual(response.data["results"][0]["slug"], self.product.slug)
 
     def test_client_defined_page_size(self):
         for i in range(15):
@@ -158,11 +175,12 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(len(response.data["results"]), 100)
 
     def test_retrieve_product_endpoint(self):
-        url = reverse("product-detail", args=[self.product._id])
+        url = reverse("product-detail", args=[self.product.slug])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["_id"], self.product._id)
         self.assertEqual(response.data["product_name"], "API Soap")
+        self.assertEqual(response.data["slug"], self.product.slug)
 
     def test_non_staff_cannot_create_product(self):
         url = reverse("product-list")
@@ -195,27 +213,28 @@ class ProductAPITestCase(TestCase):
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.post(url, payload, format="json")
         self.assertEqual(response.status_code, 201)
+        self.assertIn("slug", response.data)
 
     def test_non_staff_cannot_update_product(self):
-        url = reverse("product-detail", args=[self.product._id])
+        url = reverse("product-detail", args=[self.product.slug])
         self.client.force_authenticate(user=self.regular_user)
         response = self.client.patch(url, {"product_name": "Nope"}, format="json")
         self.assertEqual(response.status_code, 403)
 
     def test_staff_can_update_product(self):
-        url = reverse("product-detail", args=[self.product._id])
+        url = reverse("product-detail", args=[self.product.slug])
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.patch(url, {"product_name": "Updated"}, format="json")
         self.assertEqual(response.status_code, 200)
 
     def test_non_staff_cannot_delete_product(self):
-        url = reverse("product-detail", args=[self.product._id])
+        url = reverse("product-detail", args=[self.product.slug])
         self.client.force_authenticate(user=self.regular_user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
 
     def test_staff_can_delete_product(self):
-        url = reverse("product-detail", args=[self.product._id])
+        url = reverse("product-detail", args=[self.product.slug])
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
