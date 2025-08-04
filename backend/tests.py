@@ -1,4 +1,5 @@
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse, resolve
 from unittest.mock import patch
 
 
@@ -32,3 +33,11 @@ class HealthEndpointTest(TestCase):
         data = response.json()
         self.assertEqual(data.get("status"), "ok")
         self.assertEqual(data.get("database"), "unavailable")
+
+
+class APIDocumentationTest(SimpleTestCase):
+    def test_schema_urls_are_configured(self):
+        self.assertEqual(reverse("schema-json"), "/api/schema/")
+        self.assertEqual(reverse("schema-swagger-ui"), "/api/docs/")
+        resolver = resolve("/api/docs/")
+        self.assertEqual(resolver.url_name, "schema-swagger-ui")
