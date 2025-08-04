@@ -74,9 +74,7 @@ class ReviewViewSet(GenericViewSet):
         )
         review.status = "pending"
         review.save()
-
-        product.review_count += 1
-        product.save()
+        product.add_review(review.rating, review.status)
 
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -152,34 +150,7 @@ class ReviewViewSet(GenericViewSet):
         review.save()
 
         product = review.product
-
-        if old_status == "approved" and review.status == "approved":
-            if product.approved_review_count > 0:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    - old_rating
-                    + review.rating
-                ) / product.approved_review_count
-        elif old_status != "approved" and review.status == "approved":
-            if product.approved_review_count == 0:
-                product.average_rating = review.rating
-            else:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    + review.rating
-                ) / (product.approved_review_count + 1)
-            product.approved_review_count += 1
-        elif old_status == "approved" and review.status != "approved":
-            if product.approved_review_count > 1:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    - old_rating
-                ) / (product.approved_review_count - 1)
-            else:
-                product.average_rating = 0.0
-            product.approved_review_count -= 1
-
-        product.save()
+        product.update_review(old_rating, review.rating, old_status, review.status)
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -201,19 +172,7 @@ class ReviewViewSet(GenericViewSet):
             )
 
         product = review.product
-
-        if review.status == "approved":
-            if product.approved_review_count > 1:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    - review.rating
-                ) / (product.approved_review_count - 1)
-            else:
-                product.average_rating = 0.0
-            product.approved_review_count -= 1
-
-        product.review_count -= 1
-        product.save()
+        product.remove_review(review.rating, review.status)
 
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -246,26 +205,6 @@ class ReviewViewSet(GenericViewSet):
         review.save()
 
         product = review.product
-
-        if old_status != "approved" and new_status == "approved":
-            if product.approved_review_count == 0:
-                product.average_rating = review.rating
-            else:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    + review.rating
-                ) / (product.approved_review_count + 1)
-            product.approved_review_count += 1
-        elif old_status == "approved" and new_status != "approved":
-            if product.approved_review_count > 1:
-                product.average_rating = (
-                    (product.average_rating * product.approved_review_count)
-                    - review.rating
-                ) / (product.approved_review_count - 1)
-            else:
-                product.average_rating = 0.0
-            product.approved_review_count -= 1
-
-        product.save()
+        product.update_review(review.rating, review.rating, old_status, new_status)
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
