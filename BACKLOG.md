@@ -15,4 +15,4 @@
 - [x] Provide a `/health/` endpoint for basic application and database connectivity checks.
 - [x] Replace stubbed `Discount` and `Category` classes in the discounts API with real model integration and remove temporary placeholders.
 - [x] Implement unit tests for the discounts app covering models and API endpoints.
-- [ ] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
+- [x] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
