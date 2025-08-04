@@ -20,7 +20,7 @@
 - [x] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
 - [x] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
 - [x] Introduce pagination to the review list endpoint to prevent unbounded result sets.
-- [ ] Apply rate throttling to review creation to mitigate spam submissions.
+- [x] Apply rate throttling to review creation to mitigate spam submissions.
 - [ ] Move review rating and count updates into model methods or a service layer.
 - [ ] Add tests covering review creation, update, and deletion with rating recalculation.
 - [ ] Allow client-defined page size with an upper bound in `CustomProductPagination`.
