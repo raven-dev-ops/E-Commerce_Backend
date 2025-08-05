@@ -182,6 +182,31 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.data["product_name"], "API Soap")
         self.assertEqual(response.data["slug"], self.product.slug)
 
+    def test_product_detail_is_cached(self):
+        url = reverse("product-detail", args=[self.product.slug])
+        cache_key = f"product:{self.product.slug}"
+        self.assertIsNone(cache.get(cache_key))
+        first = self.client.get(url)
+        self.assertEqual(first.status_code, 200)
+        self.assertIsNotNone(cache.get(cache_key))
+        Product.drop_collection()
+        second = self.client.get(url)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(second.data["_id"], self.product._id)
+
+    def test_product_list_is_cached(self):
+        url = reverse("product-list")
+        cache_key = "product_list"
+        self.assertIsNone(cache.get(cache_key))
+        first = self.client.get(url)
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(first.data["count"], 1)
+        self.assertIsNotNone(cache.get(cache_key))
+        Product.drop_collection()
+        second = self.client.get(url)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(second.data["count"], 1)
+
     def test_filter_products_by_category(self):
         Product.objects.create(
             _id="507f1f77bcf86cd799439200",
