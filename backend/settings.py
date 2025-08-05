@@ -209,7 +209,7 @@ MONGODB_DATABASES = {
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "dummy")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "dummy")
-if STRIPE_SECRET_KEY == "dummy" or STRIPE_WEBHOOK_SECRET == "dummy":
+if STRIPE_SECRET_KEY == "dummy" or STRIPE_WEBHOOK_SECRET == "dummy":  # nosec B105
     warnings.warn(
         "Stripe keys are not set. Use valid keys in production.",
         RuntimeWarning,

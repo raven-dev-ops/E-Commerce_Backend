@@ -122,10 +122,10 @@ class ProductAPITestCase(TestCase):
         User = get_user_model()
         self.regular_user = User.objects.create_user(
             username="regular", password="pass"
-        )
+        )  # nosec B106
         self.staff_user = User.objects.create_user(
             username="staff", password="pass", is_staff=True
-        )
+        )  # nosec B106
 
     def test_list_products_endpoint(self):
         url = reverse("product-list")

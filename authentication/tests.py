@@ -7,7 +7,9 @@ User = get_user_model()
 
 class UserModelTest(TestCase):
     def test_create_user(self):
-        user = User.objects.create_user(username="testuser", password="testpass123")
+        user = User.objects.create_user(
+            username="testuser", password="testpass123"
+        )  # nosec B106
         self.assertEqual(user.username, "testuser")
         self.assertTrue(user.check_password("testpass123"))
 
@@ -18,7 +20,7 @@ class EmailVerificationTest(TestCase):
         self.user = User.objects.create_user(
             username="test@example.com",
             email="test@example.com",
-            password="testpass123",
+            password="testpass123",  # nosec B106
         )
 
     def test_login_blocked_until_verified(self):

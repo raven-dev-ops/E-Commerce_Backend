@@ -14,7 +14,9 @@ import mongomock
 class PaymentsModelTests(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username="john", password="pass")
+        self.user = User.objects.create_user(
+            username="john", password="pass"
+        )  # nosec B106
 
         self.payment = Payment.objects.create(
             user=self.user,
@@ -58,7 +60,9 @@ class StripeWebhookViewTests(TestCase):
     def setUp(self):
         Product.drop_collection()
         User = get_user_model()
-        self.user = User.objects.create_user(username="alice", password="pass")
+        self.user = User.objects.create_user(
+            username="alice", password="pass"
+        )  # nosec B106
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439500",
             product_name="Widget",
