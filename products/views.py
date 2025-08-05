@@ -30,7 +30,7 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ["product_name", "description", "tags", "category"]
     pagination_class = CustomProductPagination
-    lookup_field = "_id"  # Use '_id' for MongoDB string primary key
+    lookup_field = "slug"
     permission_classes = [AllowAny]
 
     def get_permissions(self):
@@ -41,18 +41,18 @@ class ProductViewSet(
     def get_object(self):
         pk = self.kwargs.get(self.lookup_field)
         logging.info(
-            f"[ProductViewSet] Attempting to serve detail for Product _id: {pk}"
+            f"[ProductViewSet] Attempting to serve detail for Product slug: {pk}"
         )
         cache_key = f"product:{pk}"
         product = cache.get(cache_key)
         if product:
             return product
         try:
-            product = Product.objects.get(_id=str(pk))
+            product = Product.objects.get(slug=str(pk))
             cache.set(cache_key, product, 300)
             return product
         except Product.DoesNotExist:
-            logging.error(f"[ProductViewSet] Product with _id {pk} not found")
+            logging.error(f"[ProductViewSet] Product with slug {pk} not found")
             raise Http404
         except Exception as e:
             logging.error(f"[ProductViewSet] Error retrieving product: {e}")
@@ -74,15 +74,15 @@ class ProductViewSet(
 
     def perform_create(self, serializer):
         product = serializer.save()
-        cache.set(f"product:{product._id}", product, 300)
+        cache.set(f"product:{product.slug}", product, 300)
         cache.delete("product_list")
 
     def perform_update(self, serializer):
         product = serializer.save()
-        cache.set(f"product:{product._id}", product, 300)
+        cache.set(f"product:{product.slug}", product, 300)
         cache.delete("product_list")
 
     def perform_destroy(self, instance):
-        cache.delete(f"product:{instance._id}")
+        cache.delete(f"product:{instance.slug}")
         cache.delete("product_list")
         instance.delete()

@@ -9,11 +9,13 @@ from mongoengine import (
     BooleanField,
     IntField,
 )
+from django.utils.text import slugify
 
 
 class Product(Document):
     _id = StringField(primary_key=True)  # Always a string
     product_name = StringField(max_length=255)
+    slug = StringField(max_length=255, unique=True)
     category = StringField(max_length=100)
     description = StringField()
     price = FloatField()
@@ -38,6 +40,7 @@ class Product(Document):
             "category",
             "tags",
             "product_name",
+            "slug",
         ]
     }
 
@@ -47,6 +50,17 @@ class Product(Document):
     @property
     def id_str(self):
         return str(self._id)
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.product_name:
+            base_slug = slugify(self.product_name)
+            slug = base_slug
+            counter = 1
+            while Product.objects(slug=slug).first() is not None:
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        return super().save(*args, **kwargs)
 
     def add_review(self, rating: int, status: str) -> None:
         """Increment review counts and update average rating."""
