@@ -59,7 +59,10 @@ class Order(models.Model):
         release = False
         if self.pk:
             previous = Order.objects.get(pk=self.pk)
-            if previous.status not in {Order.Status.CANCELED, Order.Status.FAILED} and self.status in {
+            if previous.status not in {
+                Order.Status.CANCELED,
+                Order.Status.FAILED,
+            } and self.status in {
                 Order.Status.CANCELED,
                 Order.Status.FAILED,
             }:
