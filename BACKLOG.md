@@ -26,7 +26,7 @@
 - [x] Allow client-defined page size with an upper bound in `CustomProductPagination`.
 - [x] Restrict product creation, update, and deletion endpoints to staff users.
 - [x] Add a unique `slug` field to `Product` for SEO-friendly URLs.
-- [ ] Support filtering products by category and price range using query parameters.
+- [x] Support filtering products by category and price range using query parameters.
 - [ ] Write tests verifying caching behavior for product list and detail views.
 - [ ] Release reserved inventory when orders are canceled or payments fail.
 - [ ] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
