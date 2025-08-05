@@ -82,6 +82,43 @@ http://127.0.0.1:8000/api/schema/
 
 A ReDoc view is also available at `/api/redoc/`.
 
+## Authentication
+
+Most API endpoints require an authenticated user. Obtain an access token by
+sending a `POST` request to the login endpoint:
+
+```bash
+curl -X POST http://localhost:8000/authentication/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "your-password"}'
+```
+
+The response includes an access token:
+
+```json
+{
+  "user": { "id": 1, "email": "user@example.com" },
+  "tokens": { "access": "abc123" }
+}
+```
+
+Include this token in the `Authorization` header when calling protected
+endpoints:
+
+```http
+Authorization: Token abc123
+```
+
+Endpoints that use JWT authentication (such as the reviews and orders APIs)
+expect the token as a Bearer token:
+
+```http
+Authorization: Bearer abc123
+```
+
+Register new users via `POST /authentication/register/` and verify email
+addresses using the link sent to the provided email account.
+
 ## Running Celery Workers
 
 Asynchronous tasks are handled with Celery. Start a worker with:

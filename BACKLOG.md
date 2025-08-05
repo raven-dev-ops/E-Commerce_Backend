@@ -39,6 +39,6 @@
 - [ ] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
 - [ ] Cache category list responses and invalidate cache on updates.
 - [ ] Internationalize user-facing error messages via Django's translation framework.
-- [ ] Document authentication requirements and examples in the README.
+- [x] Document authentication requirements and examples in the README.
 - [ ] Normalize discount codes to enforce case-insensitive uniqueness.
 - [ ] Log unhandled Stripe webhook event types for easier debugging.
