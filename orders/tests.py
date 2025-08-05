@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from orders.models import Order, OrderItem
 from unittest.mock import patch, MagicMock
 from orders.tasks import send_order_confirmation_email
+from orders.services import create_order_from_cart
 from products.models import Product
 from cart.models import Cart
 from discounts.models import Discount
@@ -64,6 +65,99 @@ class DummyCart:
 
     def save(self):
         pass
+
+
+class CreateOrderFromCartTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username="serviceuser", password="pass")
+        Address.objects.create(
+            user=self.user,
+            street="123 St",
+            city="Town",
+            country="Country",
+            zip_code="12345",
+            is_default_shipping=True,
+            is_default_billing=True,
+        )
+        self.product = SimpleNamespace(
+            id="prod1",
+            product_name="Soap",
+            price=10.0,
+            inventory=5,
+            reserved_inventory=0,
+        )
+        self.cart_items = [SimpleNamespace(product_id=self.product.id, quantity=2)]
+
+        self.product_qs = MagicMock()
+        self.product_qs.get.return_value = self.product
+
+        def filter_mock(*args, **kwargs):
+            class QS:
+                def update(inner_self, **update_kwargs):
+                    expr = update_kwargs["reserved_inventory"]
+                    qty = getattr(getattr(expr, "rhs", None), "value", 0)
+                    self.product.reserved_inventory += qty
+
+            return QS()
+
+        self.product_qs.filter.side_effect = filter_mock
+
+    def _setup_cart(self, discount=None):
+        cart = DummyCart(items=self.cart_items, discount=discount)
+        cart_qs = MagicMock()
+        cart_qs.first.return_value = cart
+        return cart_qs
+
+    def test_applies_discount_and_updates_inventory(self):
+        discount = SimpleNamespace(
+            code="SAVE10",
+            discount_type="percentage",
+            value=10,
+            times_used=0,
+        )
+
+        def save():
+            pass
+
+        discount.save = save
+
+        cart_qs = self._setup_cart(discount)
+
+        with (
+            patch("orders.services.Cart.objects", return_value=cart_qs),
+            patch("orders.services.Product.objects", self.product_qs),
+            patch(
+                "orders.services.stripe.PaymentIntent.create",
+                return_value=SimpleNamespace(id="pi_123"),
+            ),
+        ):
+            order = create_order_from_cart(
+                self.user, {"payment_method_id": "pm_1"}
+            )
+
+        self.assertEqual(order.discount_code, "SAVE10")
+        self.assertAlmostEqual(order.discount_amount, 2.0, places=2)
+        self.assertEqual(discount.times_used, 1)
+        self.assertEqual(self.product.reserved_inventory, 2)
+
+    def test_updates_inventory_without_discount(self):
+        cart_qs = self._setup_cart()
+
+        with (
+            patch("orders.services.Cart.objects", return_value=cart_qs),
+            patch("orders.services.Product.objects", self.product_qs),
+            patch(
+                "orders.services.stripe.PaymentIntent.create",
+                return_value=SimpleNamespace(id="pi_123"),
+            ),
+        ):
+            order = create_order_from_cart(
+                self.user, {"payment_method_id": "pm_1"}
+            )
+
+        self.assertIsNone(order.discount_code)
+        self.assertEqual(self.product.reserved_inventory, 2)
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)

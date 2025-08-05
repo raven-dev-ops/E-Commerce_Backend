@@ -29,7 +29,7 @@
 - [x] Support filtering products by category and price range using query parameters.
 - [x] Write tests verifying caching behavior for product list and detail views.
 - [x] Release reserved inventory when orders are canceled or payments fail.
-- [ ] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
+- [x] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
 - [ ] Implement an order cancellation endpoint that restores inventory.
 - [ ] Schedule a periodic Celery task to purge inactive carts.
 - [ ] Provide a management command to remove expired email verification tokens.
