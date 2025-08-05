@@ -36,7 +36,9 @@ class ReviewModelSerializerTest(TestCase):
         Product.drop_collection()
         Review.drop_collection()
         # Create a test user
-        self.user = User.objects.create_user(username="testuser", password="password")
+        self.user = User.objects.create_user(
+            username="testuser", password="password"
+        )  # nosec B106
         # Create a test product
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439013",
@@ -95,7 +97,9 @@ class ReviewAPIPaginationTest(TestCase):
     def setUp(self):
         Product.drop_collection()
         Review.drop_collection()
-        self.user = User.objects.create_user(username="apiuser", password="password")
+        self.user = User.objects.create_user(
+            username="apiuser", password="password"
+        )  # nosec B106
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         self.product = Product.objects.create(
@@ -160,7 +164,7 @@ class ReviewCreationThrottleTest(TestCase):
         cache.clear()
         self.user = User.objects.create_user(
             username="throttleuser", password="password"
-        )
+        )  # nosec B106
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
@@ -227,10 +231,12 @@ class ReviewRatingRecalculationTest(TestCase):
         Product.drop_collection()
         Review.drop_collection()
         cache.clear()
-        self.user = User.objects.create_user(username="ratinguser", password="password")
+        self.user = User.objects.create_user(
+            username="ratinguser", password="password"
+        )  # nosec B106
         self.admin = User.objects.create_user(
             username="admin", password="password", is_staff=True
-        )
+        )  # nosec B106
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         self.admin_client = APIClient()

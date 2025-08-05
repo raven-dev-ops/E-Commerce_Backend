@@ -22,7 +22,9 @@ class OrderModelTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username="testuser", password="pass")
+        self.user = User.objects.create_user(
+            username="testuser", password="pass"
+        )  # nosec B106
         self.order = Order.objects.create(
             user=self.user,
             total_price=100.0,
@@ -70,7 +72,9 @@ class DummyCart:
 class CreateOrderFromCartTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username="serviceuser", password="pass")
+        self.user = User.objects.create_user(
+            username="serviceuser", password="pass"
+        )  # nosec B106
         Address.objects.create(
             user=self.user,
             street="123 St",
@@ -178,7 +182,9 @@ class OrderIntegrationTestCase(TestCase):
         Discount.drop_collection()
         Cart.drop_collection()
         User = get_user_model()
-        self.user = User.objects.create_user(username="orderuser", password="pass")
+        self.user = User.objects.create_user(
+            username="orderuser", password="pass"
+        )  # nosec B106
         self.address = Address.objects.create(
             user=self.user,
             street="123 St",
@@ -321,7 +327,9 @@ class OrderCancelReleaseInventoryTestCase(TestCase):
     def setUp(self):
         Product.drop_collection()
         User = get_user_model()
-        self.user = User.objects.create_user(username="canceluser", password="pass")
+        self.user = User.objects.create_user(
+            username="canceluser", password="pass"
+        )  # nosec B106
         self.client = APIClient()
         self.client.force_authenticate(self.user)
         self.product = Product.objects.create(

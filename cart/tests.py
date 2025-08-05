@@ -34,7 +34,9 @@ class CartModelTest(TestCase):
     def setUp(self):
         Cart.drop_collection()
         Product.drop_collection()
-        self.user = User.objects.create_user(username="testuser", password="pass123")
+        self.user = User.objects.create_user(
+            username="testuser", password="pass123"
+        )  # nosec B106
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439012",
             product_name="Test Product",
@@ -76,7 +78,9 @@ class CartAPITestCase(TestCase):
         Cart.drop_collection()
         CartItem.drop_collection()
         Product.drop_collection()
-        self.user = User.objects.create_user(username="apiuser", password="pass123")
+        self.user = User.objects.create_user(
+            username="apiuser", password="pass123"
+        )  # nosec B106
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439099",
             product_name="API Product",
@@ -177,7 +181,9 @@ class PurgeInactiveCartsTaskTest(TestCase):
         Cart.drop_collection()
         CartItem.drop_collection()
         Product.drop_collection()
-        self.user = User.objects.create_user(username="taskuser", password="pass123")
+        self.user = User.objects.create_user(
+            username="taskuser", password="pass123"
+        )  # nosec B106
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439098",
             product_name="Task Product",

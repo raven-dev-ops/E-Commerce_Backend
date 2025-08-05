@@ -184,7 +184,7 @@ def create_order_from_cart(user, data) -> Order:
         try:
             CartItem.objects(cart=cart_id).delete()
         except Exception:  # pragma: no cover - defensive
-            pass
+            logger.exception("Failed to delete cart items")
 
     return order
 
