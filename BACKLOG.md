@@ -33,7 +33,7 @@
 - [x] Implement an order cancellation endpoint that restores inventory.
 - [x] Schedule a periodic Celery task to purge inactive carts.
 - [x] Provide a management command to remove expired email verification tokens.
-- [ ] Integrate Bandit security scanning into the CI workflow.
+- [x] Integrate Bandit security scanning into the CI workflow.
 - [ ] Add a `pre-commit` configuration to enforce formatting and linting before commits.
 - [ ] Introduce static type checking with mypy and add type hints across the codebase.
 - [ ] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
