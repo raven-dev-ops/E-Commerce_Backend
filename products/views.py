@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from products.models import Product
 from products.serializers import ProductSerializer
 from rest_framework.filters import SearchFilter
+from products.filters import ProductFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAdminUser
 from django.http import Http404
@@ -60,11 +61,18 @@ class ProductViewSet(
 
     def get_queryset(self):
         queryset = Product.objects.all()
+        filterset = ProductFilter(self.request.query_params, queryset=queryset)
+        queryset = filterset.qs
         logging.info(f"[ProductViewSet] Serving {queryset.count()} products.")
         return queryset
 
     def list(self, request, *args, **kwargs):
-        cache_key = "product_list"
+        params = request.query_params
+        if params:
+            serialized = ":".join(f"{k}={v}" for k, v in sorted(params.items()))
+            cache_key = f"product_list:{serialized}"
+        else:
+            cache_key = "product_list"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)

@@ -182,6 +182,57 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.data["product_name"], "API Soap")
         self.assertEqual(response.data["slug"], self.product.slug)
 
+    def test_filter_products_by_category(self):
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439200",
+            product_name="Kitchen Soap",
+            category="Kitchen",
+            description="Degreaser",
+            price=12.00,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=5,
+            reserved_inventory=0,
+        )
+        url = reverse("product-list")
+        response = self.client.get(url, {"category": "Kitchen"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["category"], "Kitchen")
+
+    def test_filter_products_by_price_range(self):
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439201",
+            product_name="Premium Soap",
+            category="Bath",
+            description="Luxurious",
+            price=15.00,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=5,
+            reserved_inventory=0,
+        )
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439202",
+            product_name="Cheap Soap",
+            category="Bath",
+            description="Budget",
+            price=1.00,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=5,
+            reserved_inventory=0,
+        )
+        url = reverse("product-list")
+        response = self.client.get(url, {"price__gte": 5, "price__lte": 15})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 2)
+        prices = sorted(float(p["price"]) for p in response.data["results"])
+        self.assertEqual(prices, [5.0, 15.0])
+
     def test_non_staff_cannot_create_product(self):
         url = reverse("product-list")
         payload = {
