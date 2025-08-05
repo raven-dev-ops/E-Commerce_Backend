@@ -132,9 +132,7 @@ class CreateOrderFromCartTestCase(TestCase):
                 return_value=SimpleNamespace(id="pi_123"),
             ),
         ):
-            order = create_order_from_cart(
-                self.user, {"payment_method_id": "pm_1"}
-            )
+            order = create_order_from_cart(self.user, {"payment_method_id": "pm_1"})
 
         self.assertEqual(order.discount_code, "SAVE10")
         self.assertAlmostEqual(order.discount_amount, 2.0, places=2)
@@ -152,9 +150,7 @@ class CreateOrderFromCartTestCase(TestCase):
                 return_value=SimpleNamespace(id="pi_123"),
             ),
         ):
-            order = create_order_from_cart(
-                self.user, {"payment_method_id": "pm_1"}
-            )
+            order = create_order_from_cart(self.user, {"payment_method_id": "pm_1"})
 
         self.assertIsNone(order.discount_code)
         self.assertEqual(self.product.reserved_inventory, 2)
