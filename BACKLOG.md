@@ -32,7 +32,7 @@
 - [x] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
 - [x] Implement an order cancellation endpoint that restores inventory.
 - [x] Schedule a periodic Celery task to purge inactive carts.
-- [ ] Provide a management command to remove expired email verification tokens.
+- [x] Provide a management command to remove expired email verification tokens.
 - [ ] Integrate Bandit security scanning into the CI workflow.
 - [ ] Add a `pre-commit` configuration to enforce formatting and linting before commits.
 - [ ] Introduce static type checking with mypy and add type hints across the codebase.
