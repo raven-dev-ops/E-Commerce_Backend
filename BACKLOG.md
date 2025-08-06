@@ -41,4 +41,4 @@
 - [x] Internationalize user-facing error messages via Django's translation framework.
 - [x] Document authentication requirements and examples in the README.
 - [x] Normalize discount codes to enforce case-insensitive uniqueness.
-- [ ] Log unhandled Stripe webhook event types for easier debugging.
+- [x] Log unhandled Stripe webhook event types for easier debugging.
