@@ -197,7 +197,11 @@ class ReviewViewSet(GenericViewSet):
         new_status = request.data.get("status")
         if new_status not in ["approved", "rejected"]:
             return Response(
-                {"detail": _("Invalid status. Status must be 'approved' or 'rejected'.")},
+                {
+                    "detail": _(
+                        "Invalid status. Status must be 'approved' or 'rejected'."
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

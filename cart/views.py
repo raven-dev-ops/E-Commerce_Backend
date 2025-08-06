@@ -38,7 +38,8 @@ class CartView(APIView):
 
         if not product_id:
             return Response(
-                {"detail": _("product_id is required")}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("product_id is required")},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -103,7 +104,8 @@ class CartView(APIView):
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
             return Response(
-                {"detail": _("Item not found in cart")}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Item not found in cart")},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         item.quantity = quantity
@@ -124,15 +126,19 @@ class CartView(APIView):
 
         if not product_id:
             return Response(
-                {"detail": _("product_id is required")}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("product_id is required")},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
             return Response(
-                {"detail": _("Item not found in cart")}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Item not found in cart")},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         item.delete()
-        return Response({"detail": _("Item removed")}, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": _("Item removed")}, status=status.HTTP_204_NO_CONTENT
+        )
