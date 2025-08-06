@@ -34,8 +34,11 @@ This repository contains a Django and MongoEngine based backend for an example e
    FACEBOOK_APP_SECRET=your-facebook-app-secret
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
+   SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
    SECURE_SSL_REDIRECT=True
 ```
+
+Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
 
 ### Stripe
 
