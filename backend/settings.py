@@ -7,6 +7,7 @@ import dj_database_url
 import warnings
 import logging
 import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from celery.schedules import crontab
@@ -31,7 +32,7 @@ if SENTRY_DSN:
     )
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), logging_integration],
+        integrations=[DjangoIntegration(), CeleryIntegration(), logging_integration],
         traces_sample_rate=1.0,
         send_default_pii=True,
     )

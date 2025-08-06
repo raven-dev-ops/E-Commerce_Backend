@@ -43,7 +43,7 @@
 - [x] Normalize discount codes to enforce case-insensitive uniqueness.
 - [x] Log unhandled Stripe webhook event types for easier debugging.
 
-- [ ] Integrate Sentry for centralized error monitoring.
+ - [x] Integrate Sentry for centralized error monitoring.
 - [ ] Implement API versioning to support backward-compatible changes.
 - [ ] Add a GraphQL endpoint to enable flexible client queries.
 - [ ] Introduce soft-delete functionality for products, orders, and carts with restoration options.
