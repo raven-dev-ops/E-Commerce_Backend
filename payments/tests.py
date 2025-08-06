@@ -119,3 +119,23 @@ class StripeWebhookViewTests(TestCase):
         self.assertEqual(self.order.status, Order.Status.FAILED)
         self.product.reload()
         self.assertEqual(self.product.reserved_inventory, 0)
+
+    @patch("stripe.Webhook.construct_event")
+    def test_unhandled_event_type_logged(self, mock_construct_event):
+        mock_construct_event.return_value = {
+            "type": "some.unhandled.event",
+            "data": {"object": {}},
+        }
+
+        with self.assertLogs("payments.views", level="INFO") as log:
+            response = self.client.post(
+                reverse("stripe-webhook"), data={}, content_type="application/json"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            any(
+                "Unhandled Stripe webhook event type: some.unhandled.event" in message
+                for message in log.output
+            )
+        )
