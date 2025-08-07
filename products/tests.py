@@ -12,6 +12,7 @@ from unittest.mock import patch
 from products.utils import send_low_stock_notification
 from products.tasks import send_low_stock_email
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class ProductModelSerializerTest(TestCase):
@@ -342,6 +343,76 @@ class ProductAPITestCase(TestCase):
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
+
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ProductBulkAPITestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        self.client = APIClient()
+        User = get_user_model()
+        self.staff_user = User.objects.create_user(
+            username="staffbulk", password="pass", is_staff=True
+        )  # nosec B106
+
+    def test_bulk_import_creates_products(self):
+        csv_data = (
+            "product_name,category,description,price,inventory,ingredients,benefits,tags\n"
+            "Bulk Soap,Bath,Desc,3.00,5,Water|Lye,Clean,Bath\n"
+            "Bulk Lotion,Bath,Moisturizer,5.50,10,Water,Moisturize,Skincare\n"
+        )
+        file = SimpleUploadedFile(
+            "products.csv", csv_data.encode("utf-8"), content_type="text/csv"
+        )
+        url = reverse("product-bulk-import", kwargs={"version": "v1"})
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.post(url, {"file": file}, format="multipart")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["imported"], 2)
+        self.assertEqual(Product.objects.count(), 2)
+
+    def test_bulk_export_returns_csv(self):
+        Product.objects.create(
+            _id="prodexp1",
+            product_name="Export Soap",
+            category="Bath",
+            description="desc",
+            price=5.0,
+            ingredients=["Water"],
+            benefits=["Clean"],
+            tags=["Bath"],
+            inventory=10,
+            reserved_inventory=0,
+        )
+        url = reverse("product-bulk-export", kwargs={"version": "v1"})
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        lines = response.content.decode("utf-8").splitlines()
+        self.assertEqual(
+            lines[0],
+            "product_name,category,description,price,inventory,ingredients,benefits,tags",
+        )
+        self.assertIn("Export Soap", lines[1])
 
 
 class ProductTasksTestCase(TestCase):
