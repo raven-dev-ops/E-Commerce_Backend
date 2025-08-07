@@ -28,13 +28,24 @@ class OrderViewSet(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         """List all orders for current user."""
-        orders = Order.objects.filter(user=request.user).order_by("-created_at")
+        orders = (
+            Order.objects.filter(user=request.user)
+            .select_related("shipping_address", "billing_address")
+            .prefetch_related("items")
+            .order_by("-created_at")
+        )
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         """Get a specific order by ID (must belong to user)."""
-        order = get_object_or_404(Order, pk=pk, user=request.user)
+        order = get_object_or_404(
+            Order.objects.select_related(
+                "shipping_address", "billing_address"
+            ).prefetch_related("items"),
+            pk=pk,
+            user=request.user,
+        )
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
@@ -45,6 +56,11 @@ class OrderViewSet(viewsets.ViewSet):
         except ValueError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
+        order = (
+            Order.objects.select_related("shipping_address", "billing_address")
+            .prefetch_related("items")
+            .get(pk=order.pk)
+        )
         serializer = OrderSerializer(order)
         send_order_confirmation_email.delay(order.id, request.user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -52,7 +68,13 @@ class OrderViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["post"], url_path="cancel")
     def cancel(self, request, pk=None, *args, **kwargs):
         """Cancel an order and restore reserved inventory."""
-        order = get_object_or_404(Order, pk=pk, user=request.user)
+        order = get_object_or_404(
+            Order.objects.select_related(
+                "shipping_address", "billing_address"
+            ).prefetch_related("items"),
+            pk=pk,
+            user=request.user,
+        )
         if order.status not in {Order.Status.PENDING, Order.Status.PROCESSING}:
             return Response(
                 {"detail": "Only pending or processing orders can be canceled."},
