@@ -51,7 +51,7 @@
 - [x] Enforce global API rate limiting to protect against abusive traffic.
  - [x] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
 - [ ] Implement background SMS notifications for order status updates.
-- [ ] Provide bulk product import and export via CSV files.
+- [x] Provide bulk product import and export via CSV files.
 - [ ] Implement WebSocket-based real-time order status notifications.
 - [ ] Add a feature flag framework to allow gradual feature rollouts.
 - [ ] Support distributed caching with a Redis cluster for scalability.
