@@ -1,9 +1,13 @@
 from functools import partial
 from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+from orders.models import Order
+from reviews.models import Review
 
 
 def get_user_model_ref():
@@ -63,3 +67,60 @@ class CustomGoogleLogin(SocialLoginView):
     # partial ensures extra arguments don't conflict
     client_class = partial(OAuth2Client, scope_delimiter=" ")
     callback_url = "https://twiinz-beard-frontend.netlify.app"
+
+
+class UserDataExportView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        user_data = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone_number": user.phone_number,
+            "date_joined": user.date_joined.isoformat(),
+        }
+
+        orders = []
+        for order in Order.objects.filter(user=user).prefetch_related("items"):
+            orders.append(
+                {
+                    "id": order.id,
+                    "created_at": order.created_at.isoformat(),
+                    "total_price": str(order.total_price),
+                    "status": order.status,
+                    "items": [
+                        {
+                            "product_name": item.product_name,
+                            "quantity": item.quantity,
+                            "unit_price": str(item.unit_price),
+                        }
+                        for item in order.items.all()
+                    ],
+                }
+            )
+
+        reviews = []
+        for review in Review.objects.filter(user_id=user.id):
+            product_name = (
+                review.product.product_name
+                if getattr(review, "product", None)
+                else None
+            )
+            reviews.append(
+                {
+                    "product": product_name,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                    "status": review.status,
+                    "created_at": review.created_at.isoformat(),
+                }
+            )
+
+        data = {"user": user_data, "orders": orders, "reviews": reviews}
+        response = Response(data)
+        response["Content-Disposition"] = 'attachment; filename="user-data.json"'
+        return response
