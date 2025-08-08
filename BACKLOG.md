@@ -67,4 +67,4 @@
 - [x] Schedule periodic cleanup of expired user sessions.
 - [ ] Publish an official Python API client SDK for external integrations.
 - [ ] Implement multi-factor authentication for administrative users.
-- [ ] Add a user data export endpoint to support GDPR requests.
+- [x] Add a user data export endpoint to support GDPR requests.
