@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "discounts",
     "reviews",
     "authentication",
+    "audit",
 ]
 
 SITE_ID = 2
@@ -157,6 +158,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "audit.middleware.AuditLogMiddleware",
     "waffle.middleware.WaffleMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
