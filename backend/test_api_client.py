@@ -1,12 +1,14 @@
 from django.test import SimpleTestCase
 from unittest.mock import MagicMock, patch
+import uuid
 
 from sdk import ECommerceClient
 
 
 class ECommerceClientTest(SimpleTestCase):
     def test_get_products_fetches_data(self):
-        client = ECommerceClient("http://example.com", token="abc")
+        test_token = uuid.uuid4().hex
+        client = ECommerceClient("http://example.com", token=test_token)
         with patch.object(client.session, "get") as mock_get:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
@@ -21,5 +23,8 @@ class ECommerceClientTest(SimpleTestCase):
             self.assertEqual(data, {"results": []})
 
     def test_token_header_set_on_init(self):
-        client = ECommerceClient("http://example.com", token="secret")
-        self.assertEqual(client.session.headers["Authorization"], "Bearer secret")
+        test_token = uuid.uuid4().hex
+        client = ECommerceClient("http://example.com", token=test_token)
+        self.assertEqual(
+            client.session.headers["Authorization"], f"Bearer {test_token}"
+        )
