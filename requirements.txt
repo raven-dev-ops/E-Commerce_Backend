@@ -46,6 +46,7 @@ django-waffle==5.0.0
 drf-yasg==1.21.7
 elasticsearch==8.15.0
 graphene-django==3.2.3
+ddtrace==3.11.2
 flake8==7.1.0
 black==24.4.2
 mypy==1.11.1
