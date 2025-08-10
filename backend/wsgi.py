@@ -8,8 +8,16 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os
-from .mongo_connection import connect_mongodb
 
+# Enable DataDog APM if available
+try:  # pragma: no cover - optional dependency
+    from ddtrace import patch_all  # type: ignore
+
+    patch_all(mongoengine=False)
+except Exception:  # pragma: no cover - ignore if ddtrace isn't installed
+    pass
+
+from .mongo_connection import connect_mongodb
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")

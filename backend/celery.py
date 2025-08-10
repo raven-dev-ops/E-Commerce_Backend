@@ -1,4 +1,13 @@
 import os
+
+# Enable DataDog APM if available
+try:  # pragma: no cover - optional dependency
+    from ddtrace import patch_all  # type: ignore
+
+    patch_all(mongoengine=False)
+except Exception:  # pragma: no cover - ignore if ddtrace isn't installed
+    pass
+
 from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")

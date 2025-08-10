@@ -98,6 +98,10 @@ With the server running you can begin making changes and submitting pull request
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
    SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
+   DD_AGENT_HOST=localhost
+   DD_TRACE_AGENT_PORT=8126
+   DD_SERVICE=ecommerce-backend
+   DD_ENV=development
    SECURE_SSL_REDIRECT=True
    GLOBAL_ANON_THROTTLE_RATE=100/day
    GLOBAL_USER_THROTTLE_RATE=1000/day
@@ -106,6 +110,7 @@ With the server running you can begin making changes and submitting pull request
 ```
 
 Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
+Providing `DD_AGENT_HOST` and related variables enables DataDog APM tracing.
 
 ### Stripe
 
