@@ -121,7 +121,7 @@
 - [ ] Add behavior-driven tests using a tool like Behave.
 - [ ] Publish a Postman collection covering all API endpoints.
 - [ ] Generate large dataset fixtures for performance testing.
-- [ ] Document onboarding steps for new developers in the README.
+ - [x] Document onboarding steps for new developers in the README.
 - [ ] Filter noisy log messages to reduce storage costs.
 - [ ] Compress API requests and responses using gzip.
 - [ ] Enable HTTP/2 support for faster client communication.
