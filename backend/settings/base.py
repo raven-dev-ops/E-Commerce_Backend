@@ -330,6 +330,7 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": "v1",
     "ALLOWED_VERSIONS": ["v1"],
     "VERSION_PARAM": "version",
+    "EXCEPTION_HANDLER": "backend.exceptions.custom_exception_handler",
 }
 
 REST_USE_JWT = True

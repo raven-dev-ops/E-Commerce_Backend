@@ -491,6 +491,51 @@ class ProductTasksTestCase(TestCase):
         self.assertTrue(updated.images[0].endswith("test.jpg"))
 
 
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ValidationErrorFormatTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        self.client = APIClient()
+        User = get_user_model()
+        self.admin = User.objects.create_user(
+            username="admin", password="pass", is_staff=True
+        )  # nosec B106
+
+    def test_structured_validation_errors(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.post(
+            "/api/v1/products/",
+            data={},
+            format="json",
+            secure=True,
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertIn("errors", data)
+        self.assertIsInstance(data["errors"], list)
+        fields = {err.get("field") for err in data["errors"]}
+        self.assertIn("product_name", fields)
+
+
 class ProductRecommendationServiceTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
