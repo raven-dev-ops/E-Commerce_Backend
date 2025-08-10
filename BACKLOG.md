@@ -75,7 +75,7 @@
 - [x] Pre-warm caches during deployments to reduce cold-start latency.
 - [x] Collect metrics for database query performance and track slow queries.
 - [x] Refactor settings to support hierarchical environment-specific overrides.
-- [ ] Integrate with an external ERP system for unified inventory management.
+- [x] Integrate with an external ERP system for unified inventory management.
 - [ ] Expose a webhook for shipment tracking updates from carriers.
 - [x] Provide an endpoint for customers to download order invoices in PDF.
 - [ ] Support purchasing and redeeming digital gift cards.
