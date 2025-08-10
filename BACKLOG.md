@@ -149,7 +149,7 @@
 - [ ] Track user consent preferences for marketing emails.
 - [ ] Add an endpoint to check real-time inventory availability.
 - [ ] Calculate tax based on customer location automatically.
-- [ ] Provide a quickstart guide for new contributors in the README.
+- [x] Provide a quickstart guide for new contributors in the README.
 - [ ] Build analytics charts for the admin dashboard.
 - [ ] Store feature toggle states in the database for runtime updates.
 - [ ] Offer an API sandbox environment for integrators.

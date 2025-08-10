@@ -2,6 +2,30 @@
 
 This repository contains a Django and MongoEngine based backend for an example e-commerce platform.
 
+## Quickstart for Contributors
+
+Get a local development instance running with the following commands:
+
+```bash
+git clone <repo-url>
+cd e-commerce-backend
+python -m venv venv
+source venv/bin/activate
+cp .env.example .env
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_sample_data  # optional
+python manage.py runserver
+```
+
+In a separate terminal, start a Celery worker for background tasks:
+
+```bash
+celery -A backend worker -l info
+```
+
+The API will be available at `http://127.0.0.1:8000/`.
+
 ## Environment Setup
 
 1. **Clone the repository**
