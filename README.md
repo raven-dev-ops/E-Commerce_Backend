@@ -26,6 +26,43 @@ celery -A backend worker -l info
 
 The API will be available at `http://127.0.0.1:8000/`.
 
+## Developer Onboarding
+
+New contributors can get started quickly by following these steps:
+
+1. **Fork and clone the repository**
+   ```bash
+   git clone <your-fork-url>
+   cd e-commerce-backend
+   ```
+2. **Create and activate a virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   ```
+3. **Install dependencies and set up environment variables**
+   ```bash
+   cp .env.example .env
+   pip install -r requirements.txt
+   ```
+4. **Run database migrations and optional seed data**
+   ```bash
+   python manage.py migrate
+   python manage.py seed_sample_data  # optional
+   ```
+5. **Verify the setup by running tests and lint checks**
+   ```bash
+   pre-commit run --files <files you changed>
+   CI=1 python manage.py test
+   ```
+6. **Start the development server and Celery worker**
+   ```bash
+   python manage.py runserver
+   celery -A backend worker -l info
+   ```
+
+With the server running you can begin making changes and submitting pull requests.
+
 ## Environment Setup
 
 1. **Clone the repository**
