@@ -25,6 +25,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET", "")
+DB_SLOW_QUERY_THRESHOLD = float(os.getenv("DB_SLOW_QUERY_THRESHOLD", "0.5"))
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
@@ -412,3 +413,6 @@ SECURE_HSTS_PRELOAD = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
+
+# Ensure database monitoring signal handlers are registered
+from . import db_monitoring  # noqa: E402,F401
