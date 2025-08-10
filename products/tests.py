@@ -649,3 +649,57 @@ class PrewarmCachesCommandTest(TestCase):
         self.assertIsNotNone(cache.get("product_list"))
         self.assertIsNotNone(cache.get(f"product:{self.product.slug}"))
         self.assertIsNotNone(cache.get("category_list"))
+
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    ERP_API_URL="https://erp.example.com",
+    ERP_API_KEY="testkey",
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ERPInventorySyncTest(TestCase):
+    """Tests for syncing inventory with the external ERP system."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        self.product = Product.objects.create(
+            _id="erp1",
+            product_name="ERP Soap",
+            category="Bath",
+            description="desc",
+            price=1.0,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=0,
+            reserved_inventory=0,
+        )
+
+    @patch("erp.client.requests.get")
+    def test_sync_inventory_command_updates_product(self, mock_get):
+        mock_get.return_value.json.return_value = {"inventory": 25}
+        mock_get.return_value.raise_for_status.return_value = None
+
+        call_command("sync_inventory_from_erp")
+        self.product.reload()
+        self.assertEqual(self.product.inventory, 25)
+        mock_get.assert_called_with(
+            "https://erp.example.com/inventory/erp1",
+            headers={"Authorization": "Bearer testkey"},
+            timeout=5,
+        )

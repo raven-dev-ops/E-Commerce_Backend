@@ -6,6 +6,7 @@ from typing import List
 
 from orders.models import OrderItem
 from products.models import Product
+from erp.client import get_inventory
 
 
 def get_recommended_products(user, limit: int = 5) -> List[Product]:
@@ -33,3 +34,14 @@ def get_recommended_products(user, limit: int = 5) -> List[Product]:
         category__in=list(categories), product_name__nin=purchased_names
     ).order_by("-average_rating")
     return list(recommended_qs[:limit])
+
+
+def sync_product_inventory(product: Product) -> int:
+    """Update ``product`` inventory from the ERP system.
+
+    Returns the new inventory level.
+    """
+    inventory = get_inventory(product._id)
+    product.inventory = inventory
+    product.save()
+    return inventory

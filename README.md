@@ -50,6 +50,8 @@ The API will be available at `http://127.0.0.1:8000/`.
    ALLOWED_HOSTS=localhost,127.0.0.1
    DATABASE_URL=postgres://user:pass@host:5432/dbname  # or sqlite:///db.sqlite3
    MONGODB_URI=mongodb://localhost:27017/dbname
+   ERP_API_URL=https://erp.example.com
+   ERP_API_KEY=your-erp-api-key
    STRIPE_SECRET_KEY=sk_test_your_key
    STRIPE_WEBHOOK_SECRET=whsec_your_key
    GOOGLE_CLIENT_ID=your-google-client-id

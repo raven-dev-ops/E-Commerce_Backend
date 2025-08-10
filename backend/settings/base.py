@@ -35,6 +35,10 @@ ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL", "http://localhost:9200")
 
 SHIPMENT_WEBHOOK_SECRET = os.getenv("SHIPMENT_WEBHOOK_SECRET", "")
 
+# External ERP configuration
+ERP_API_URL = os.getenv("ERP_API_URL", "")
+ERP_API_KEY = os.getenv("ERP_API_KEY", "")
+
 # Global API throttle rates
 ANON_THROTTLE_RATE = os.getenv("GLOBAL_ANON_THROTTLE_RATE", "100/day")
 USER_THROTTLE_RATE = os.getenv("GLOBAL_USER_THROTTLE_RATE", "1000/day")
