@@ -1,11 +1,14 @@
 import os
 import django
+from django.core.management import call_command
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 django.setup()
+call_command("migrate", run_syncdb=True, verbosity=0)
 
 from django.contrib.auth import get_user_model  # noqa: E402
 from django.test import RequestFactory, TestCase  # noqa: E402
+from django.utils.crypto import get_random_string  # noqa: E402
 
 from .models import Notification  # noqa: E402
 from .views import _event_stream, notifications_stream  # noqa: E402
@@ -14,7 +17,9 @@ from .views import _event_stream, notifications_stream  # noqa: E402
 class NotificationStreamTests(TestCase):
     def setUp(self) -> None:
         self.user = get_user_model().objects.create_user(
-            username="user", email="user@example.com", password="pass1234"
+            username="user",
+            email="user@example.com",
+            password=get_random_string(12),
         )
 
     def test_event_stream_yields_notifications(self) -> None:
