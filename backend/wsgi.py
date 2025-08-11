@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 import os
 
 from . import datadog  # noqa: F401
+from . import opentelemetry  # noqa: F401
 
 from .mongo_connection import connect_mongodb
 from django.core.wsgi import get_wsgi_application

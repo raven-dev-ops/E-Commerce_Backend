@@ -1,6 +1,7 @@
 import os
 
 from . import datadog  # noqa: F401
+from . import opentelemetry  # noqa: F401
 
 from celery import Celery
 
