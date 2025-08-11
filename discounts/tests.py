@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from mongoengine.errors import NotUniqueError
+from django.utils.crypto import get_random_string
 
 from discounts.models import Discount
 from products.models import Product, Category
@@ -232,7 +233,9 @@ class DiscountAdminTest(TestCase):
         Discount.drop_collection()
         User = get_user_model()
         self.admin_user = User.objects.create_superuser(
-            username="admin", email="admin@example.com", password="pass1234"
+            username="admin",
+            email="admin@example.com",
+            password=get_random_string(12),
         )
         self.client.force_login(self.admin_user)
         Discount.objects.create(code="ADMIN10", discount_type="fixed", value=10)

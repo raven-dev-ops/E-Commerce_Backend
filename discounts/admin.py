@@ -1,7 +1,6 @@
 """Admin configuration for the discounts app."""
 
 from django_mongoengine import mongo_admin
-from django_mongoengine.mongo_admin.sites import DocumentMetaWrapper
 
 from .models import Discount
 from products.models import Category, Product
@@ -31,8 +30,6 @@ class DefaultManager:
 
 
 for document in (Product, Category, Discount):
-    # Ensure referenced documents expose Django-like `_meta` attributes
-    document._meta = DocumentMetaWrapper(document)
     document._default_manager = DefaultManager(document)
 
 mongo_admin.site.register(Discount, DiscountAdmin)
