@@ -1,11 +1,6 @@
 import os
-from importlib import util
 
-# Enable DataDog APM if available
-if util.find_spec("ddtrace"):  # pragma: no cover - optional dependency
-    from ddtrace import patch_all  # type: ignore
-
-    patch_all(mongoengine=False)
+from . import datadog  # noqa: F401
 
 from celery import Celery
 

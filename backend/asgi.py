@@ -8,13 +8,8 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 
 import os
-from importlib import util
 
-# Enable DataDog APM if available
-if util.find_spec("ddtrace"):  # pragma: no cover - optional dependency
-    from ddtrace import patch_all  # type: ignore
-
-    patch_all(mongoengine=False)
+from . import datadog  # noqa: F401
 
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
