@@ -3,7 +3,9 @@ from importlib import util
 
 """Optional OpenTelemetry tracing integration."""
 
-if util.find_spec("opentelemetry") and os.getenv("OTEL_TRACE_ENABLED", "true").lower() in {"true", "1"}:
+if util.find_spec("opentelemetry") and os.getenv(
+    "OTEL_TRACE_ENABLED", "true"
+).lower() in {"true", "1"}:
     from opentelemetry import trace  # type: ignore
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # type: ignore
     from opentelemetry.instrumentation.django import DjangoInstrumentor  # type: ignore
@@ -12,7 +14,9 @@ if util.find_spec("opentelemetry") and os.getenv("OTEL_TRACE_ENABLED", "true").l
     from opentelemetry.sdk.trace import TracerProvider  # type: ignore
     from opentelemetry.sdk.trace.export import BatchSpanProcessor  # type: ignore
 
-    resource = Resource.create({SERVICE_NAME: os.getenv("OTEL_SERVICE_NAME", "ecommerce-backend")})
+    resource = Resource.create(
+        {SERVICE_NAME: os.getenv("OTEL_SERVICE_NAME", "ecommerce-backend")}
+    )
     provider = TracerProvider(resource=resource)
     processor = BatchSpanProcessor(
         OTLPSpanExporter(

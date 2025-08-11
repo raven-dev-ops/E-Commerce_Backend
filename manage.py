@@ -5,6 +5,7 @@ import sys
 
 # Configure DataDog APM if the optional dependency is available
 import backend.datadog  # noqa: F401
+
 # Configure OpenTelemetry tracing if the optional dependency is available
 import backend.opentelemetry  # noqa: F401
 
