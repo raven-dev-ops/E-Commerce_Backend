@@ -164,7 +164,7 @@
 - [ ] Generate signed URLs for accessing private assets.
 - [ ] Retry failed webhooks with exponential backoff.
 - [ ] Monitor database replication lag and alert on thresholds.
-- [ ] Expose an admin endpoint to purge application caches.
+ - [x] Expose an admin endpoint to purge application caches.
 - [ ] Stream inventory updates using Server-Sent Events.
 - [ ] Provide gRPC client SDK code generation scripts.
 - [ ] Make audit logs queryable through an API endpoint.

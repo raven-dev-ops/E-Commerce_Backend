@@ -10,6 +10,8 @@ from backend.celery_monitoring import (
     TASK_FAILURES,
     TASK_SUCCESSES,
 )
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
 
 
 class SecurityHeadersMiddlewareTest(TestCase):
@@ -185,6 +187,33 @@ class GraphQLComplexityLimitTest(TestCase):
         data = response.json()
         self.assertIn("errors", data)
         self.assertIn("too complex", data["errors"][0]["message"])
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class CachePurgeEndpointTest(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_superuser(
+            username="admin", password="adminpass"
+        )  # nosec B106
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.admin)
+
+    def test_purge_clears_cache(self):
+        cache.set("foo", "bar")
+        url = reverse("purge-cache", kwargs={"version": "v1"})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(cache.get("foo"))
+
+    def test_non_admin_forbidden(self):
+        user = get_user_model().objects.create_user(
+            username="user", password="pass"
+        )  # nosec B106
+        client = APIClient()
+        client.force_authenticate(user=user)
+        url = reverse("purge-cache", kwargs={"version": "v1"})
+        response = client.post(url)
+        self.assertEqual(response.status_code, 403)
 
 
 class CeleryMonitoringTest(TestCase):
