@@ -8,13 +8,8 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os
-from importlib import util
 
-# Enable DataDog APM if available
-if util.find_spec("ddtrace"):  # pragma: no cover - optional dependency
-    from ddtrace import patch_all  # type: ignore
-
-    patch_all(mongoengine=False)
+from . import datadog  # noqa: F401
 
 from .mongo_connection import connect_mongodb
 from django.core.wsgi import get_wsgi_application

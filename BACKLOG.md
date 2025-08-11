@@ -81,7 +81,7 @@
 - [x] Support purchasing and redeeming digital gift cards.
 - [x] Implement referral codes with tracking for marketing campaigns.
 - [x] Enable real-time notifications via Server-Sent Events.
-- [ ] Integrate DataDog APM for enhanced application monitoring.
+- [x] Integrate DataDog APM for enhanced application monitoring.
 - [ ] Add OpenTelemetry distributed tracing across services.
 - [x] Return structured validation error objects in API responses.
 - [x] Cache GraphQL introspection queries to reduce overhead.

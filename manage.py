@@ -2,13 +2,9 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from importlib import util
 
-# Enable DataDog APM if available
-if util.find_spec("ddtrace"):  # pragma: no cover - optional dependency
-    from ddtrace import patch_all  # type: ignore
-
-    patch_all(mongoengine=False)
+# Configure DataDog APM if the optional dependency is available
+import backend.datadog  # noqa: F401
 
 
 def main():
