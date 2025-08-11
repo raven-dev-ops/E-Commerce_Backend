@@ -11,6 +11,7 @@ from mongoengine import (
     ReferenceField,
 )
 from products.models import Product, Category
+from django_mongoengine.mongo_admin.sites import DocumentMetaWrapper
 
 
 class Discount(Document):
@@ -35,3 +36,8 @@ class Discount(Document):
 
     def __str__(self):
         return f"{self.code} ({self.discount_type})"
+
+
+# Provide Django-like `_meta` to integrate with admin checks
+for document in (Product, Category, Discount):
+    document._meta = DocumentMetaWrapper(document)
