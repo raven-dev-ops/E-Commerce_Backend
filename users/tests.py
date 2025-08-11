@@ -1,6 +1,7 @@
 """Tests for the users app."""
 
 from datetime import timedelta, datetime
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -74,13 +75,15 @@ class UserPauseReactivateTest(TestCase):
 
 class RevokeSessionsOnPasswordChangeTest(TestCase):
     def test_sessions_removed_after_password_change(self):
-        user = User.objects.create_user(username="u", password="oldpass")  # nosec B106
+        old_password = uuid4().hex
+        new_password = uuid4().hex
+        user = User.objects.create_user(username="u", password=old_password)
         client = APIClient()
-        self.assertTrue(client.login(username="u", password="oldpass"))
+        self.assertTrue(client.login(username="u", password=old_password))
         session_key = client.session.session_key
         self.assertTrue(Session.objects.filter(session_key=session_key).exists())
 
-        user.set_password("newpass")  # nosec B106
+        user.set_password(new_password)
         user.save()
 
         self.assertFalse(Session.objects.filter(session_key=session_key).exists())
