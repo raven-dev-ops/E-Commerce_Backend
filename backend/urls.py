@@ -13,7 +13,7 @@ from drf_yasg import openapi
 from django.views.decorators.csrf import csrf_exempt
 from backend.schema import schema
 from backend.graphql import CachedGraphQLView
-from backend.views import PurgeCacheView
+from backend.views import PurgeCacheView, RateLimitStatusView
 
 
 def home(request):
@@ -72,6 +72,7 @@ api_urlpatterns = [
         "graphql/", csrf_exempt(CachedGraphQLView.as_view(schema=schema, graphiql=True))
     ),
     path("cache/purge/", PurgeCacheView.as_view(), name="purge-cache"),
+    path("rate-limit/", RateLimitStatusView.as_view(), name="rate-limit"),
 ]
 
 urlpatterns = [
