@@ -62,6 +62,26 @@ class HealthEndpointTest(TestCase):
         self.assertEqual(data.get("database"), "unavailable")
 
 
+class RateLimitStatusViewTest(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="ratelimit", password="pass"
+        )  # nosec B106
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+        self.url = reverse("rate-limit", kwargs={"version": "v1"})
+
+    def test_rate_limit_usage_reported(self):
+        first = self.client.get(self.url, secure=True, HTTP_HOST="localhost")
+        self.assertEqual(first.status_code, 200)
+        data1 = first.json()["user"]
+        self.assertEqual(data1["remaining"], data1["limit"] - 1)
+
+        second = self.client.get(self.url, secure=True, HTTP_HOST="localhost")
+        data2 = second.json()["user"]
+        self.assertEqual(data2["remaining"], data1["remaining"] - 1)
+
+
 class APIDocumentationTest(SimpleTestCase):
     def test_schema_urls_are_configured(self):
         self.assertEqual(reverse("schema-json"), "/api/schema/")

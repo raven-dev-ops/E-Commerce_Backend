@@ -133,7 +133,7 @@
 - [x] Allow marking orders as gifts with custom messages.
 - [ ] Encrypt sensitive data at rest using a KMS.
 - [ ] Offer per-user notification preference settings.
-- [ ] Expose an endpoint showing API rate usage and limits.
+- [x] Expose an endpoint showing API rate usage and limits.
 - [ ] Support partial returns for individual order line items.
 - [ ] Define rules for stacking multiple coupons on one order.
 - [ ] Add subscription billing for recurring product purchases.
