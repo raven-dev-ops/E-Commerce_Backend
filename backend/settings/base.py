@@ -273,6 +273,7 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_PREFLIGHT_MAX_AGE = int(os.getenv("CORS_PREFLIGHT_MAX_AGE", "86400"))
 
 CSRF_TRUSTED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",

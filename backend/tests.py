@@ -29,6 +29,19 @@ class SecurityHeadersMiddlewareTest(TestCase):
         )
 
 
+class CorsPreflightCacheTest(TestCase):
+    def test_preflight_response_is_cached(self):
+        response = self.client.options(
+            "/health/",
+            secure=True,
+            HTTP_HOST="localhost",
+            HTTP_ORIGIN="https://twiinz-beard-frontend.netlify.app",
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD="GET",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("Access-Control-Max-Age"), "86400")
+
+
 class CorrelationIdMiddlewareTest(TestCase):
     def test_correlation_id_added(self):
         response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
