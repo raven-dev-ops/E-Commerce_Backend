@@ -138,7 +138,7 @@
 - [ ] Define rules for stacking multiple coupons on one order.
 - [ ] Add subscription billing for recurring product purchases.
 - [ ] Provide personalized product recommendations via ML models.
-- [ ] Cache CORS pre-flight responses to reduce request overhead.
+- [x] Cache CORS pre-flight responses to reduce request overhead.
 - [ ] Supply a script to reset the staging database.
 - [ ] Enforce commit signature verification in the repository.
 - [ ] Customize logging formats per environment.
