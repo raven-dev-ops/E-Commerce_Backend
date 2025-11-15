@@ -15,3 +15,5 @@ class ReferralCodeCreateSerializer(serializers.Serializer):
 
 class ReferralCodeTrackSerializer(serializers.Serializer):
     code = serializers.CharField()
+
+

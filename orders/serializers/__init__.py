@@ -1,18 +1,14 @@
-# orders/serializers.py
-
 from rest_framework import serializers
 from orders.models import Order, OrderItem  # Django ORM models
 from authentication.serializers import AddressSerializer
 
 
-# OrderItem uses Django ORM ModelSerializer
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ["id", "product_name", "quantity", "unit_price"]
 
 
-# Order uses Django ORM ModelSerializer, nests items and addresses
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     shipping_address = AddressSerializer(read_only=True)
@@ -50,3 +46,5 @@ class OrderSerializer(serializers.ModelSerializer):
             "items",
             "currency",
         ]
+
+

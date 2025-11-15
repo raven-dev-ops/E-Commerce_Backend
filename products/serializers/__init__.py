@@ -5,7 +5,6 @@ from bson import ObjectId
 
 
 class ProductSerializer(DocumentSerializer):
-    # Expose _id as a string for the frontend
     _id = serializers.CharField(read_only=True)
 
     product_name = serializers.CharField(max_length=255)
@@ -84,3 +83,5 @@ class ProductSerializer(DocumentSerializer):
                 {"unpublish_at": "Must be after publish_at."}
             )
         return attrs
+
+

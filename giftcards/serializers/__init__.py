@@ -30,3 +30,5 @@ class GiftCardPurchaseSerializer(serializers.Serializer):
 
 class GiftCardRedeemSerializer(serializers.Serializer):
     code = serializers.CharField()
+
+

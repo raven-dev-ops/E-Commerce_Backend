@@ -1,5 +1,3 @@
-# discoounts/serializers.py
-
 from rest_framework import serializers
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from products.models import Product, Category
@@ -41,3 +39,5 @@ class CategorySerializer(DocumentSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+
+

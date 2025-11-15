@@ -1,5 +1,3 @@
-# src/authentication/serializers.py
-
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from authentication.models import Address
@@ -75,26 +73,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return None
 
 
-# ——— Custom Social‑Login Serializer ———
-
-
-class CustomSocialLoginSerializer(SocialLoginSerializer):
-    """
-    Wraps allauth's OAuth2Client but only passes each init‑arg once,
-    preventing the 'multiple values for argument "scope_delimiter"' error.
-    """
-
-    adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client
-    callback_url = None  # e.g. your front‑end redirect URI
-
-    def get_client(self, request, adapter):
-        app = adapter.get_provider().get_app(request)
-        return self.client_class(
-            request=request,
-            client_id=app.client_id,
-            client_secret=app.secret,
-            access_token_url=adapter.access_token_url,
-            authorize_url=adapter.authorize_url,
-            callback_url=self.callback_url,
-        )

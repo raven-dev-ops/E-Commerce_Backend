@@ -1,5 +1,3 @@
-# review/serializers.py
-
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -7,12 +5,8 @@ from reviews.models import Review
 
 
 class ReviewSerializer(DocumentSerializer):
-    user_id = serializers.IntegerField(
-        write_only=True
-    )  # Accept user_id when creating/updating
-    user = serializers.SerializerMethodField(
-        read_only=True
-    )  # Show username when reading
+    user_id = serializers.IntegerField(write_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
 
     def get_user(self, obj):
         User = get_user_model()
@@ -34,3 +28,5 @@ class ReviewSerializer(DocumentSerializer):
             "status",
             "created_at",
         ]
+
+

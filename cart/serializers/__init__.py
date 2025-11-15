@@ -1,5 +1,3 @@
-# cart/serializers.py
-
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
 from cart.models import Cart, CartItem
@@ -15,3 +13,5 @@ class CartSerializer(DocumentSerializer):
     class Meta:
         model = Cart
         fields = ("id", "user")
+
+
