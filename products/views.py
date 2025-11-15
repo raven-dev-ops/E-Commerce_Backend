@@ -79,18 +79,14 @@ class ProductViewSet(
         return queryset
 
     def list(self, request, *args, **kwargs):
-        params = request.query_params
-        if params:
-            serialized = ":".join(f"{k}={v}" for k, v in sorted(params.items()))
-            cache_key = f"product_list:{serialized}"
-        else:
-            cache_key = "product_list"
-        cached = cache.get(cache_key)
-        if cached is not None:
-            return Response(cached)
-        response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response.data, 300)
-        return response
+        """
+        Backend no longer serves products from a database.
+
+        The frontend uses its own static product catalog, so this
+        endpoint returns an empty paginated response to avoid 500s
+        while keeping the route stable.
+        """
+        return Response({"count": 0, "results": []})
 
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request, *args, **kwargs):
