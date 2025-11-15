@@ -44,7 +44,7 @@ class CorsPreflightCacheTest(TestCase):
             "/health/",
             secure=True,
             HTTP_HOST="localhost",
-            HTTP_ORIGIN="https://twiinz-beard-frontend.netlify.app",
+            HTTP_ORIGIN="https://art-bay.netlify.app",
             HTTP_ACCESS_CONTROL_REQUEST_METHOD="GET",
         )
         self.assertEqual(response.status_code, 200)

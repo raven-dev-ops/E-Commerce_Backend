@@ -266,7 +266,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Allow configurable CORS origins via environment variable. If not provided,
 # default to the deployed frontend and local development URLs.
 _default_cors = [
-    "https://twiinz-beard-frontend.netlify.app",
+    "https://art-bay.netlify.app",
     FRONTEND_URL,
 ]
 CORS_ALLOWED_ORIGINS = [
@@ -278,8 +278,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = int(os.getenv("CORS_PREFLIGHT_MAX_AGE", "86400"))
 
 _default_csrf = [
-    "https://twiinz-beard-frontend.netlify.app",
-    "https://twiinz-beard-backend-11dfd7158830.herokuapp.com",
+    "https://art-bay.netlify.app",
     "https://art-bay-e7451b528caa.herokuapp.com",
 ]
 CSRF_TRUSTED_ORIGINS = [

@@ -67,7 +67,7 @@ class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     # partial ensures extra arguments don't conflict
     client_class = partial(OAuth2Client, scope_delimiter=" ")
-    callback_url = "https://twiinz-beard-frontend.netlify.app"
+    callback_url = "https://art-bay.netlify.app"
 
 
 class UserDataExportView(APIView):
