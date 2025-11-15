@@ -276,9 +276,15 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = int(os.getenv("CORS_PREFLIGHT_MAX_AGE", "86400"))
 
-CSRF_TRUSTED_ORIGINS = [
+_default_csrf = [
     "https://twiinz-beard-frontend.netlify.app",
     "https://twiinz-beard-backend-11dfd7158830.herokuapp.com",
+    "https://art-bay-e7451b528caa.herokuapp.com",
+]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", ",".join(_default_csrf)).split(",")
+    if origin.strip()
 ]
 
 LOGGING = {
@@ -426,6 +432,8 @@ else:
 
 # Security settings
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 31536000
