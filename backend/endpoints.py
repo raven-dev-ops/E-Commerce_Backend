@@ -24,9 +24,19 @@ def home(request):
     except Exception:
         db_status = "unavailable"
 
+    raw_status = os.getenv("CI_LAST_TEST_STATUS", "unknown")
+    status_lower = raw_status.lower()
+    tests_passed = status_lower in {"passed", "success", "green"}
+
     tests_info = {
-        "status": os.getenv("CI_LAST_TEST_STATUS", "unknown"),
+        "passed": tests_passed,
+        "status": raw_status,
         "last_run": os.getenv("CI_LAST_TEST_RUN", "unknown"),
+        "branch": os.getenv("CI_LAST_TEST_BRANCH", "unknown"),
+        "commit": os.getenv(
+            "CI_LAST_TEST_COMMIT", os.getenv("GIT_COMMIT_SHA", "unknown")
+        ),
+        "url": os.getenv("CI_LAST_TEST_URL", None),
     }
 
     logging_info = {
