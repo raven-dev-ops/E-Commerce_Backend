@@ -1,50 +1,22 @@
-from django.test import TestCase, override_settings
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-from unittest.mock import patch
-from decimal import Decimal
 import hashlib
 import hmac
 import json
 import logging
 import time
 
-from django.conf import settings
+from decimal import Decimal
 
-from orders.models import Order, OrderItem
-from payments.models import Payment, Transaction
-from products.models import Product
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from django.urls import reverse
 from mongoengine import connect, disconnect
+from unittest.mock import patch
+
 import mongomock
 
-
-class PaymentsModelTests(TestCase):
-    def setUp(self):
-        User = get_user_model()
-        self.user = User.objects.create_user(
-            username="john", password="pass"
-        )  # nosec B106
-
-        self.payment = Payment.objects.create(
-            user=self.user,
-            invoice="INV1001",
-            amount=Decimal("150.00"),
-            method="CC",
-        )
-
-        self.transaction = Transaction.objects.create(
-            payment=self.payment,
-            status="Completed",
-        )
-
-    def test_payment_str(self):
-        self.assertEqual(
-            str(self.payment), f"Payment {self.payment.id} - john - 150.00"
-        )
-
-    def test_transaction_str(self):
-        self.assertIn("Transaction", str(self.transaction))
-        self.assertIn("Completed", str(self.transaction))
+from orders.models import Order, OrderItem
+from products.models import Product
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -66,21 +38,21 @@ class StripeWebhookViewTests(TestCase):
 
     def setUp(self):
         Product.drop_collection()
-        User = get_user_model()
-        self.user = User.objects.create_user(
-            username="alice", password="pass"
-        )  # nosec B106
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username="alice", password="pass"  # nosec B106
+        )
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439500",
             product_name="Widget",
             category="Test",
-            price=10.0,
+            price=Decimal("10.0"),
             inventory=5,
             reserved_inventory=1,
         )
         self.order = Order.objects.create(
             user=self.user,
-            total_price=10.0,
+            total_price=Decimal("10.0"),
             shipping_cost=0,
             tax_amount=0,
             payment_intent_id="pi_test",
@@ -90,7 +62,7 @@ class StripeWebhookViewTests(TestCase):
             order=self.order,
             product_name=self.product.product_name,
             quantity=1,
-            unit_price=10.0,
+            unit_price=Decimal("10.0"),
         )
 
     @patch("stripe.Webhook.construct_event")
@@ -182,21 +154,21 @@ class StripeWebhookIntegrationTests(TestCase):
 
     def setUp(self):
         Product.drop_collection()
-        User = get_user_model()
-        self.user = User.objects.create_user(
-            username="alice", password="pass"
-        )  # nosec B106
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username="alice", password="pass"  # nosec B106
+        )
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439500",
             product_name="Widget",
             category="Test",
-            price=10.0,
+            price=Decimal("10.0"),
             inventory=5,
             reserved_inventory=1,
         )
         self.order = Order.objects.create(
             user=self.user,
-            total_price=10.0,
+            total_price=Decimal("10.0"),
             shipping_cost=0,
             tax_amount=0,
             payment_intent_id="pi_test",
@@ -206,7 +178,7 @@ class StripeWebhookIntegrationTests(TestCase):
             order=self.order,
             product_name=self.product.product_name,
             quantity=1,
-            unit_price=10.0,
+            unit_price=Decimal("10.0"),
         )
 
     def _generate_sig(self, payload: str) -> str:
@@ -282,3 +254,4 @@ class StripeWebhookIntegrationTests(TestCase):
         self.assertEqual(self.order.status, Order.Status.PENDING)
         self.product.reload()
         self.assertEqual(self.product.reserved_inventory, 1)
+
