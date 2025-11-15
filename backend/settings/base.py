@@ -398,8 +398,9 @@ if CELERY_BROKER_URL.startswith("rediss://"):
     else:
         CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-    ssl_options = {"cert_reqs": ssl.CERT_NONE}
+    ssl_options = {"ssl_cert_reqs": ssl.CERT_NONE}
     CELERY_BROKER_TRANSPORT_OPTIONS["ssl"] = ssl_options
+    CELERY_BROKER_USE_SSL = ssl_options
     CELERY_REDIS_BACKEND_USE_SSL = ssl_options
 
 CELERY_BEAT_SCHEDULE = {
