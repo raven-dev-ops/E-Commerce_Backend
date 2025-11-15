@@ -134,6 +134,8 @@ celerybeat.pid
 .venv
 env/
 venv/
+deploy-key-raven-dev-ops-ecommerce-backend
+deploy-key-raven-dev-ops-ecommerce-backend.pub
 ENV/
 env.bak/
 venv.bak/
