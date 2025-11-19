@@ -4,20 +4,16 @@ This document outlines planned work and the long-term technical direction for th
 
 ## Near-Term Goals
 
-- [ ] Extract concrete roadmap items from `BACKLOG.md`.
-- [ ] Prioritize features based on business impact and technical risk.
+Summarize near-term priorities here (features, fixes, and improvements planned for the next releases). See `wiki.md` for the detailed checklist of open technical tasks.
 
 ## Mid-Term Goals
 
-- [ ] Define scaling, performance, and reliability milestones.
-- [ ] Plan integrations with external services and systems.
+Describe scaling, performance, and reliability milestones, as well as medium-horizon feature work.
 
 ## Long-Term Vision
 
-- [ ] Capture multi-year product and platform goals.
-- [ ] Revisit and revise this roadmap regularly.
+Capture multi-year product and platform goals and update this narrative as the project evolves. Checklist-style tasks associated with this roadmap are tracked in `wiki.md`.
 
 ---
 
 For licensing and usage details, see the **License & Usage** section in `README.md`. This project is provided with **no license**; all rights are reserved by the owner.
-
