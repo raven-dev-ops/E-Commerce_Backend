@@ -8,6 +8,14 @@ This repository contains a Django-based backend for an example e-commerce platfo
 >
 > **Private forks or other private copies of this repository are not allowed** for any purpose. Any fork or clone that the owner expressly permits must remain public and clearly reference this repository.
 
+## Project Documentation Tasks
+
+The following documentation items are still outstanding for this repository:
+
+- `timeline.md` — project chronology and major milestones.
+- `roadmap.md` — upcoming work and long-term direction.
+- `wiki.md` — central wiki-style overview linking to other documentation.
+
 ## Quickstart for Contributors
 
 > Only collaborators who have received explicit written permission from the owner may contribute. Do **not** create private forks or private copies of this repository.
@@ -269,7 +277,7 @@ client = ECommerceClient("https://api.example.com", token="your-api-token")
 
 ## License & Usage
 
-- This project is licensed under a **proprietary license**; see `LICENSE` in the repository root.
+- This project is provided with **no license**; no rights to use, copy, modify, or distribute the code are granted.
 - You must obtain **explicit written permission** from the owner before using, copying, modifying, or distributing this codebase.
 - **Private forks or any other private copies are not permitted.** Any fork or clone that the owner expressly permits must remain public and clearly attribute this repository and its owner.
 products = client.get_products()
