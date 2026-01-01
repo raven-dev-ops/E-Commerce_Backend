@@ -14,7 +14,8 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 import logging
 from django.conf import settings
-from django.utils.dateparse import parse_datetime
+from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime
 
 from .tasks import send_order_confirmation_email
 from .services import create_order_from_cart, generate_invoice_pdf
@@ -107,6 +108,43 @@ class OrderViewSet(viewsets.ViewSet):
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
+
+    @action(detail=True, methods=["post"], url_path="schedule-delivery")
+    def schedule_delivery(self, request, pk=None, *args, **kwargs):
+        """Schedule a preferred delivery date for a pending order."""
+
+        order = get_object_or_404(
+            Order.objects.select_related("shipping_address", "billing_address")
+            .prefetch_related("items"),
+            pk=pk,
+            user=request.user,
+        )
+        if order.status not in {Order.Status.PENDING, Order.Status.PROCESSING}:
+            return Response(
+                {"detail": "Only pending or processing orders can be scheduled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        date_value = request.data.get("preferred_delivery_date")
+        if not date_value:
+            return Response(
+                {"detail": "preferred_delivery_date is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        preferred = parse_date(str(date_value))
+        if not preferred:
+            return Response(
+                {"detail": "Invalid preferred_delivery_date."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if preferred < timezone.localdate():
+            return Response(
+                {"detail": "preferred_delivery_date must be today or later."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.preferred_delivery_date = preferred
+        order.save(update_fields=["preferred_delivery_date"])
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
 
 @api_view(["POST"])
 @authentication_classes([])

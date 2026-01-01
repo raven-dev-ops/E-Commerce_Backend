@@ -30,6 +30,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "shipping_address",
             "billing_address",
             "shipped_date",
+            "preferred_delivery_date",
             "discount_code",
             "discount_type",
             "discount_value",

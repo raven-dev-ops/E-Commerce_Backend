@@ -54,6 +54,7 @@ class Order(models.Model):
     )
     discount_code = models.CharField(max_length=50, blank=True, null=True)
     shipped_date = models.DateTimeField(null=True, blank=True)
+    preferred_delivery_date = models.DateField(null=True, blank=True)
     discount_type = models.CharField(
         max_length=20,
         blank=True,
