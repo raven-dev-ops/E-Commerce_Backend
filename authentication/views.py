@@ -41,14 +41,11 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        email = request.data.get("email")
+        email = (request.data.get("email") or "").strip().lower()
         password = request.data.get("password")
 
         User = get_user_model()
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            user = None
+        user = User.objects.filter(email__iexact=email).first()
 
         if user and user.check_password(password) and user.email_verified:
             if user.is_paused:

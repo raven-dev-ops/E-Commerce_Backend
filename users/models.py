@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.functions import Lower
 import uuid
 
 
@@ -30,6 +31,20 @@ class User(AbstractUser):
     )
     mfa_secret = models.CharField(max_length=32, blank=True, null=True)
     is_paused = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.email:
+            self.email = self.email.strip().lower()
+        return super().save(*args, **kwargs)
+
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                Lower("email"),
+                name="unique_user_email_ci",
+                condition=~models.Q(email=""),
+            )
+        ]
 
     def __str__(self):
         return self.username

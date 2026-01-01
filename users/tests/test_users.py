@@ -9,6 +9,7 @@ from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -35,6 +36,48 @@ class UserModelTest(TestCase):
         )  # nosec B106
         self.assertTrue(admin_user.is_superuser)
         self.assertTrue(admin_user.is_staff)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class UserEmailNormalizationTest(TestCase):
+    def test_normalizes_email_on_save(self):
+        user = User.objects.create_user(
+            username="normalize",
+            email="MiXed@Example.COM",
+            password="pass",
+        )  # nosec B106
+        self.assertEqual(user.email, "mixed@example.com")
+
+    def test_email_is_case_insensitive_unique(self):
+        User.objects.create_user(
+            username="first",
+            email="dupe@example.com",
+            password="pass",
+        )  # nosec B106
+        with self.assertRaises(IntegrityError):
+            User.objects.create_user(
+                username="second",
+                email="DUPE@EXAMPLE.COM",
+                password="pass",
+            )  # nosec B106
+
+    def test_login_accepts_case_insensitive_email(self):
+        user = User.objects.create_user(
+            username="case",
+            email="Case@Example.com",
+            password="pass",
+        )  # nosec B106
+        user.email_verified = True
+        user.save(update_fields=["email_verified"])
+
+        client = APIClient()
+        url = reverse("login", kwargs={"version": "v1"})
+        response = client.post(
+            url,
+            {"email": "CASE@EXAMPLE.COM", "password": "pass"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
