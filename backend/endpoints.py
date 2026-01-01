@@ -111,6 +111,7 @@ api_urlpatterns = [
     path("referrals/", include("referrals.endpoints")),
     path("notifications/", include("notifications.endpoints")),
     path("authentication/", include("authentication.endpoints")),
+    path("audit/", include("audit.endpoints")),
     path("auth/", include("dj_rest_auth.urls")),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("auth/social/", include("allauth.socialaccount.urls")),
