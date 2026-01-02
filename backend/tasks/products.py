@@ -8,13 +8,7 @@ from django.core.mail import send_mail
 from products.models import Product
 
 
-@shared_task(
-    autoretry_for=(Exception,),
-    retry_backoff=True,
-    retry_backoff_max=3600,
-    retry_jitter=True,
-    retry_kwargs={"max_retries": 5},
-)
+@shared_task
 def send_low_stock_email(
     product_name: str, product_id: str, current_stock: int
 ) -> None:
@@ -31,13 +25,7 @@ def send_low_stock_email(
     send_mail(subject, message, from_email, recipient_list)
 
 
-@shared_task(
-    autoretry_for=(Exception,),
-    retry_backoff=True,
-    retry_backoff_max=3600,
-    retry_jitter=True,
-    retry_kwargs={"max_retries": 5},
-)
+@shared_task
 def upload_product_image_to_s3(product_id: str, filename: str, content: bytes) -> None:
     """Upload a product image to S3 and update the product record."""
     bucket = settings.AWS_S3_BUCKET
@@ -47,7 +35,7 @@ def upload_product_image_to_s3(product_id: str, filename: str, content: bytes) -
     key = f"products/{product_id}/{filename}"
     s3.upload_fileobj(BytesIO(content), bucket, key)
     url = f"https://{bucket}.s3.amazonaws.com/{key}"
-    product = Product.objects(_id=product_id).first()
+    product = Product.objects.filter(id=product_id).first()
     if product:
         product.images.append(url)
         product.save()

@@ -1,0 +1,12 @@
+repository:
+  topics:
+    - ecommerce
+    - django
+    - django-rest-framework
+    - rest-api
+    - python
+    - celery
+    - postgresql
+    - redis
+    - stripe
+    - payments

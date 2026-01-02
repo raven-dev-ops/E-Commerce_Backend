@@ -1,6 +1,3 @@
-"""
-Legacy review serializers removed; reviews are no longer stored
-on the server.
-"""
+from .reviews import ReviewSerializer, ReviewWriteSerializer
 
-__all__: list[str] = []
+__all__ = ["ReviewSerializer", "ReviewWriteSerializer"]

@@ -4,8 +4,6 @@ from django.db import models
 from django.conf import settings
 from django.db.models import Q
 from authentication.models import Address  # Adjust import if Address is elsewhere
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 
 
 class ActiveOrderManager(models.Manager):
@@ -34,6 +32,9 @@ class Order(models.Model):
     payment_intent_id = models.CharField(
         max_length=255, blank=True, null=True, db_index=True
     )
+    idempotency_key = models.CharField(
+        max_length=64, blank=True, null=True, unique=True
+    )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=Status.PENDING, db_index=True
     )
@@ -54,15 +55,18 @@ class Order(models.Model):
     )
     discount_code = models.CharField(max_length=50, blank=True, null=True)
     shipped_date = models.DateTimeField(null=True, blank=True)
-    preferred_delivery_date = models.DateField(null=True, blank=True)
     discount_type = models.CharField(
         max_length=20,
         blank=True,
         null=True,
         choices=[("percentage", "Percentage"), ("fixed", "Fixed")],
     )
-    discount_value = models.FloatField(blank=True, null=True)
-    discount_amount = models.FloatField(blank=True, null=True)
+    discount_value = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
     is_gift = models.BooleanField(default=False)
     gift_message = models.CharField(max_length=500, blank=True)
     is_deleted = models.BooleanField(default=False)
@@ -82,37 +86,6 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
 
-    def save(self, *args, **kwargs):  # pragma: no cover - exercised via tests
-        release = False
-        notify = False
-        if self.pk:
-            previous = Order.all_objects.get(pk=self.pk)
-            if previous.status not in {
-                Order.Status.CANCELED,
-                Order.Status.FAILED,
-            } and self.status in {
-                Order.Status.CANCELED,
-                Order.Status.FAILED,
-            }:
-                release = True
-            if previous.status != self.status:
-                notify = True
-        super().save(*args, **kwargs)
-        if release:
-            from orders.services import release_reserved_inventory
-
-            release_reserved_inventory(self)
-        if notify and self.user.phone_number:
-            from orders.tasks import send_order_status_sms
-
-            send_order_status_sms.delay(self.id, self.status, self.user.phone_number)
-        if notify:
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f"order_{self.id}",
-                {"type": "status.update", "status": self.status},
-            )
-
     def delete(self, using=None, keep_parents=False):
         self.is_deleted = True
         self.save(update_fields=["is_deleted"])
@@ -124,6 +97,13 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        "products.Product",
+        on_delete=models.PROTECT,
+        related_name="order_items",
+        null=True,
+        blank=True,
+    )
     product_name = models.CharField(
         max_length=255
     )  # Or ForeignKey to a Product model if using Django ORM
@@ -132,3 +112,15 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_name} (x{self.quantity})"
+
+
+class ShipmentWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True, db_index=True)
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="shipment_webhook_events"
+    )
+    status = models.CharField(max_length=20)
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ShipmentWebhookEvent {self.event_id} for order {self.order_id}"

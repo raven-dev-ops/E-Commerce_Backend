@@ -29,25 +29,26 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Demo user already exists.")
 
-        if not Category.objects(name="Skincare").first():
-            category = Category(name="Skincare", description="Skincare products")
-            category.save()
+        if not Category.objects.filter(name="Skincare").first():
+            category = Category.objects.create(
+                name="Skincare", description="Skincare products"
+            )
 
-            Product(
+            Product.objects.create(
                 product_name="Sample Lotion",
-                category=category.name,
+                category=category,
                 description="A soothing lotion for demonstration purposes.",
                 price=19.99,
                 inventory=100,
-            ).save()
+            )
 
-            Product(
+            Product.objects.create(
                 product_name="Sample Cleanser",
-                category=category.name,
+                category=category,
                 description="A gentle cleanser for demonstration purposes.",
                 price=9.99,
                 inventory=150,
-            ).save()
+            )
 
             self.stdout.write(self.style.SUCCESS("Created sample products."))
         else:

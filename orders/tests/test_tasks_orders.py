@@ -49,6 +49,7 @@ class OrderTasksTestCase(TestCase):
 
         mock_client.assert_not_called()
 
+
 @override_settings(ORDER_PENDING_TIMEOUT_MINUTES=30, SECURE_SSL_REDIRECT=False)
 class AutoCancelStaleOrdersTest(TestCase):
     def setUp(self):

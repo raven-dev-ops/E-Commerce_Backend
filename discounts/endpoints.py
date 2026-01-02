@@ -1,20 +1,19 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from .views import (
-    DiscountListCreateAPIView,
-    DiscountRetrieveUpdateDestroyAPIView,
     CategoryListCreateAPIView,
     CategoryRetrieveUpdateDestroyAPIView,
+    DiscountValidateAPIView,
+    DiscountViewSet,
 )
 
+router = DefaultRouter()
+router.register(r"discounts", DiscountViewSet, basename="discount")
+
 urlpatterns = [
-    path(
-        "discounts/", DiscountListCreateAPIView.as_view(), name="discount-list-create"
-    ),
-    path(
-        "discounts/<str:pk>/",
-        DiscountRetrieveUpdateDestroyAPIView.as_view(),
-        name="discount-detail",
-    ),
+    path("discounts/validate/", DiscountValidateAPIView.as_view(), name="discount-validate"),
+    path("", include(router.urls)),
     path(
         "categories/", CategoryListCreateAPIView.as_view(), name="category-list-create"
     ),

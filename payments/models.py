@@ -24,3 +24,13 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"Transaction {self.id} - {self.status}"
+
+
+class StripeWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True, db_index=True)
+    event_type = models.CharField(max_length=255)
+    livemode = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"StripeEvent {self.event_type} - {self.event_id}"

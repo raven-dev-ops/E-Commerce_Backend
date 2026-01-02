@@ -96,7 +96,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CustomSocialLoginSerializer(SocialLoginSerializer):
     """
     Placeholder custom social-login serializer so the
-    REST_AUTH_SERIALIZERS setting resolves correctly.
+    REST_AUTH setting can reference it if needed.
     """
 
     # You can extend this later to add custom behavior.

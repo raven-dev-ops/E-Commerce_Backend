@@ -108,6 +108,10 @@ With the server running you can begin making changes and submitting pull request
    ERP_API_KEY=your-erp-api-key
    STRIPE_SECRET_KEY=sk_test_your_key
    STRIPE_WEBHOOK_SECRET=whsec_your_key
+   STRIPE_WEBHOOK_TOLERANCE=300
+   SHIPMENT_WEBHOOK_SECRET=your-shipment-webhook-secret
+   SHIPMENT_WEBHOOK_TOLERANCE=300
+   EXCHANGE_RATE_API_URL=https://api.exchangerate.host/latest
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
    FACEBOOK_APP_ID=your-facebook-app-id
@@ -115,7 +119,6 @@ With the server running you can begin making changes and submitting pull request
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
    SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
-   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/your/webhook/url
    DD_AGENT_HOST=localhost
    DD_TRACE_AGENT_PORT=8126
    DD_SERVICE=ecommerce-backend
@@ -128,9 +131,11 @@ With the server running you can begin making changes and submitting pull request
    ORDER_PENDING_TIMEOUT_MINUTES=30  # minutes before pending orders are canceled
 ```
 
+When `DEBUG=False`, the server will fail fast if `SECRET_KEY`,
+`STRIPE_SECRET_KEY`, or `STRIPE_WEBHOOK_SECRET` are missing.
+
 Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
 Providing `DD_AGENT_HOST` and related variables enables DataDog APM tracing.
-Setting `SLACK_WEBHOOK_URL` sends ERROR-level logs to a Slack channel.
 
 ### Stripe
 
@@ -140,6 +145,29 @@ Stripe integration requires two environment variables:
 - `STRIPE_WEBHOOK_SECRET` – used to verify incoming webhooks.
 
 Without these values, checkout and webhook endpoints will return server errors.
+
+### Discounts
+
+Discounts are managed server-side by admins. End users can validate a discount
+code with:
+
+```
+POST /api/v1/discounts/discounts/validate/
+```
+
+### Reviews
+
+Reviews are stored server-side. Public listing is available at:
+
+```
+GET /api/v1/reviews/reviews/?product_id=<product_id>
+```
+
+### Metrics
+
+Prometheus metrics are exposed at `/metrics` when at least one of
+`METRICS_AUTH_TOKEN` or `METRICS_ALLOWED_IPS` is configured. Provide
+`X-Metrics-Token: <token>` or allowlist the caller IP.
 
 ## Docker Compose
 
@@ -188,27 +216,28 @@ curl -X POST http://localhost:8000/api/v1/authentication/login/ \
   -d '{"email": "user@example.com", "password": "your-password"}'
 ```
 
-The response includes an access token:
+The response includes access and refresh tokens:
 
 ```json
 {
   "user": { "id": 1, "email": "user@example.com" },
-  "tokens": { "access": "abc123" }
+  "tokens": { "access": "abc123", "refresh": "def456" }
 }
 ```
 
-Include this token in the `Authorization` header when calling protected
+Include the access token in the `Authorization` header when calling protected
 endpoints:
 
 ```http
-Authorization: Token abc123
+Authorization: Bearer abc123
 ```
 
-Endpoints that use JWT authentication (such as the reviews and orders APIs)
-expect the token as a Bearer token:
+Refresh expired access tokens by posting the refresh token:
 
-```http
-Authorization: Bearer abc123
+```bash
+curl -X POST http://localhost:8000/api/v1/authentication/token/refresh/ \
+  -H "Content-Type: application/json" \
+  -d '{"refresh": "def456"}'
 ```
 
 Register new users via `POST /authentication/register/` and verify email

@@ -1,8 +1,16 @@
 import os
+import sys
 
 """Optional OpenTelemetry tracing integration."""
 
-if os.getenv("OTEL_TRACE_ENABLED", "true").lower() in {"true", "1"}:
+_testing = bool(
+    os.getenv("CI")
+    or os.getenv("TESTING")
+    or os.getenv("PYTEST_CURRENT_TEST")
+    or "test" in sys.argv
+)
+
+if not _testing and os.getenv("OTEL_TRACE_ENABLED", "true").lower() in {"true", "1"}:
     try:
         from opentelemetry import trace  # type: ignore
         from opentelemetry.exporter.otlp.proto.http.trace_exporter import (

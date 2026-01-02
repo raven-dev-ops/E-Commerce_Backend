@@ -8,16 +8,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mongo:5.0
-        ports:
-          - 27017:27017
     env:
       DATABASE_URL: sqlite:///db.sqlite3
-      MONGO_URI: mongodb://localhost:27017/test
       SECRET_KEY: dummy
       ALLOWED_HOSTS: localhost,127.0.0.1
+      DJANGO_ENV: test
       CI: 1
     steps:
       - uses: actions/checkout@v4

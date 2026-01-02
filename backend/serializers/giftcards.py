@@ -4,6 +4,8 @@ from giftcards.models import GiftCard
 
 
 class GiftCardSerializer(serializers.ModelSerializer):
+    issued_by_id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = GiftCard
         fields = [
@@ -13,6 +15,7 @@ class GiftCardSerializer(serializers.ModelSerializer):
             "balance",
             "is_active",
             "created_at",
+            "issued_by_id",
             "redeemed_at",
         ]
         read_only_fields = [
@@ -21,6 +24,7 @@ class GiftCardSerializer(serializers.ModelSerializer):
             "balance",
             "is_active",
             "created_at",
+            "issued_by_id",
             "redeemed_at",
         ]
 

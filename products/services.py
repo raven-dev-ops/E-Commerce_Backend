@@ -25,14 +25,17 @@ def get_recommended_products(user, limit: int = 5) -> List[Product]:
     if not purchased_names:
         return []
 
-    purchased_products = Product.objects(product_name__in=purchased_names)
-    categories = {p.category for p in purchased_products}
+    published_qs = Product.objects.published()
+    purchased_products = published_qs.filter(product_name__in=purchased_names)
+    categories = {p.category_id for p in purchased_products}
     if not categories:
         return []
 
-    recommended_qs = Product.objects(
-        category__in=list(categories), product_name__nin=purchased_names
-    ).order_by("-average_rating")
+    recommended_qs = (
+        published_qs.filter(category_id__in=list(categories))
+        .exclude(product_name__in=purchased_names)
+        .order_by("-average_rating")
+    )
     return list(recommended_qs[:limit])
 
 
@@ -41,7 +44,8 @@ def sync_product_inventory(product: Product) -> int:
 
     Returns the new inventory level.
     """
-    inventory = get_inventory(product._id)
+    external_id = product.erp_id or str(product.id)
+    inventory = get_inventory(external_id)
     product.inventory = inventory
     product.save()
     return inventory

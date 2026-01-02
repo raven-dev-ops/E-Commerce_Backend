@@ -13,12 +13,14 @@ class Command(BaseCommand):
         for product in Product.objects.all():
             try:
                 inventory = sync_product_inventory(product)
+                external_id = product.erp_id or str(product.id)
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Synced inventory for product {product._id}: {inventory}"
+                        f"Synced inventory for product {external_id}: {inventory}"
                     )
                 )
             except ERPClientError as exc:
+                external_id = product.erp_id or str(product.id)
                 self.stderr.write(
-                    self.style.ERROR(f"Failed to sync product {product._id}: {exc}")
+                    self.style.ERROR(f"Failed to sync product {external_id}: {exc}")
                 )

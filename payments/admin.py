@@ -1,7 +1,7 @@
 # payments/admin.py
 
 from django.contrib import admin
-from .models import Payment, Transaction
+from .models import Payment, Transaction, StripeWebhookEvent
 
 
 @admin.register(Payment)
@@ -20,3 +20,11 @@ class TransactionAdmin(admin.ModelAdmin):
     search_fields = ("payment__invoice", "payment__user__username", "status")
     ordering = ("-processed_at",)
     autocomplete_fields = ("payment",)
+
+
+@admin.register(StripeWebhookEvent)
+class StripeWebhookEventAdmin(admin.ModelAdmin):
+    list_display = ("event_id", "event_type", "livemode", "created_at")
+    list_filter = ("event_type", "livemode", "created_at")
+    search_fields = ("event_id", "event_type")
+    ordering = ("-created_at",)

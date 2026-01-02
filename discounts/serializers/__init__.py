@@ -1,6 +1,3 @@
-"""
-Legacy discount serializers removed; discounts are no longer
-managed server-side.
-"""
+from .discounts import DiscountSerializer, DiscountPublicSerializer
 
-__all__: list[str] = []
+__all__ = ["DiscountSerializer", "DiscountPublicSerializer"]

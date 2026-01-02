@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets, permissions
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from .throttles import LoginRateThrottle
 import logging
@@ -27,13 +27,23 @@ class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
 
 
+def _build_tokens(user):
+    refresh = RefreshToken.for_user(user)
+    return {"access": str(refresh.access_token), "refresh": str(refresh)}
+
+
 class UserRegistrationView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         send_verification_email.delay(user.id)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        user_serializer = UserProfileSerializer(user)
+        tokens = _build_tokens(user)
+        return Response(
+            {"user": user_serializer.data, "tokens": tokens},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
@@ -66,11 +76,10 @@ class LoginView(APIView):
                         {"detail": "Invalid or missing OTP."},
                         status=status.HTTP_403_FORBIDDEN,
                     )
-            token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserProfileSerializer(user)
             logging.info(f"User '{user.email}' logged in.")
             return Response(
-                {"user": user_serializer.data, "tokens": {"access": token.key}},
+                {"user": user_serializer.data, "tokens": _build_tokens(user)},
                 status=status.HTTP_200_OK,
             )
 
@@ -87,7 +96,7 @@ class LoginView(APIView):
 
 
 class UserProfileView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -105,7 +114,7 @@ class UserProfileView(APIView):
 
 class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):

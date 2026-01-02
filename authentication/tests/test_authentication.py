@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 import json
 import pyotp
+from uuid import uuid4
 
 User = get_user_model()
 
@@ -43,7 +44,10 @@ class EmailVerificationTest(TestCase):
         self.assertTrue(self.user.email_verified)
 
     def test_verify_email_with_invalid_token_returns_404(self):
-        url = reverse("verify-email", kwargs={"token": "invalid-token", "version": "v1"})
+        url = reverse(
+            "verify-email",
+            kwargs={"token": str(uuid4()), "version": "v1"},
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
         self.user.refresh_from_db()
@@ -90,7 +94,10 @@ class AdminMFATest(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("tokens", response.json())
+        payload = response.json()
+        self.assertIn("tokens", payload)
+        self.assertIn("access", payload["tokens"])
+        self.assertIn("refresh", payload["tokens"])
 
     def test_admin_login_with_missing_otp_fails(self):
         response = self.client.post(

@@ -1,6 +1,8 @@
 # backend/settings/base.py
 
 import os
+import sys
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
@@ -9,6 +11,7 @@ import logging
 import ssl
 from typing import Any
 import sentry_sdk
+from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -24,7 +27,6 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 )
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET", "")
 DB_SLOW_QUERY_THRESHOLD = float(os.getenv("DB_SLOW_QUERY_THRESHOLD", "0.5"))
@@ -34,8 +36,15 @@ TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
 
 ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL", "http://localhost:9200")
+METRICS_AUTH_TOKEN = os.getenv("METRICS_AUTH_TOKEN", "")
+METRICS_ALLOWED_IPS = [
+    ip.strip()
+    for ip in os.getenv("METRICS_ALLOWED_IPS", "").split(",")
+    if ip.strip()
+]
 
 SHIPMENT_WEBHOOK_SECRET = os.getenv("SHIPMENT_WEBHOOK_SECRET", "")
+SHIPMENT_WEBHOOK_TOLERANCE = int(os.getenv("SHIPMENT_WEBHOOK_TOLERANCE", "300"))
 
 # External ERP configuration
 ERP_API_URL = os.getenv("ERP_API_URL", "")
@@ -71,7 +80,7 @@ INSTALLED_APPS = [
     # Third-party
     "corsheaders",
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "allauth",
@@ -213,12 +222,16 @@ else:
     CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+IS_TESTING = bool(
+    os.getenv("CI")
+    or os.getenv("TESTING")
+    or os.getenv("PYTEST_CURRENT_TEST")
+    or "test" in sys.argv
+)
 
-# Force a lightweight SQLite database during CI or explicit test runs to avoid
-# network calls to external Postgres instances. The CI environment typically
-# sets `CI=true`, while developers can use `TESTING=1` when running tests
-# locally.
-if os.getenv("CI") or os.getenv("TESTING"):
+# Force a lightweight SQLite database during CI or test runs to avoid network
+# calls to external Postgres instances.
+if IS_TESTING:
     DATABASE_URL = "sqlite:///db.sqlite3"
 
 if DATABASE_URL and DATABASE_URL.startswith("sqlite"):
@@ -239,6 +252,7 @@ else:
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "dummy")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "dummy")
+STRIPE_WEBHOOK_TOLERANCE = int(os.getenv("STRIPE_WEBHOOK_TOLERANCE", "300"))
 if STRIPE_SECRET_KEY == "dummy" or STRIPE_WEBHOOK_SECRET == "dummy":  # nosec B105
     warnings.warn(
         "Stripe keys are not set. Use valid keys in production.",
@@ -294,10 +308,6 @@ LOGGING = {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
         },
-        "slack": {
-            "format": "[{levelname}] {name}: {message}",
-            "style": "{",
-        },
     },
     "handlers": {
         "console": {
@@ -318,15 +328,6 @@ LOGGING = {
         },
     },
 }
-
-if SLACK_WEBHOOK_URL:
-    LOGGING["handlers"]["slack"] = {
-        "class": "backend.logging_handlers.SlackWebhookHandler",
-        "level": "ERROR",
-        "formatter": "slack",
-        "webhook_url": SLACK_WEBHOOK_URL,
-    }
-    LOGGING["root"]["handlers"].append("slack")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -355,9 +356,28 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "backend.exceptions.custom_exception_handler",
 }
 
-REST_USE_JWT = True
-REST_AUTH_TOKEN_MODEL = None
-REST_AUTH_SERIALIZERS = {
+if IS_TESTING:
+    REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"].update(
+        {
+            "anon": "100000/min",
+            "user": "100000/min",
+            "login": "100000/min",
+            "review-create": "100000/min",
+        }
+    )
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+REST_AUTH = {
+    "USE_JWT": True,
+    "TOKEN_MODEL": None,
     "SOCIAL_LOGIN_SERIALIZER": "backend.serializers.authentication.CustomSocialLoginSerializer",
 }
 
@@ -379,6 +399,13 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_TRANSPORT_OPTIONS: dict[str, Any] = {}
 CELERY_REDIS_BACKEND_USE_SSL: dict[str, Any] | None = None
+
+if IS_TESTING:
+    CELERY_BROKER_URL = "memory://"
+    CELERY_RESULT_BACKEND = "cache+memory://"
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_TASK_IGNORE_RESULT = True
 
 def _append_ssl_flag(url: str) -> str:
     if "ssl_cert_reqs=" in url:
@@ -426,7 +453,7 @@ ORDER_PENDING_TIMEOUT_MINUTES = int(
 )
 
 # Cache configuration
-if os.getenv("CI") or os.getenv("TESTING"):
+if IS_TESTING:
     CACHES: dict[str, dict[str, Any]] = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -470,6 +497,29 @@ SECURE_HSTS_PRELOAD = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
+
+
+def _require_setting(name: str, condition: bool, hint: str) -> None:
+    if not condition:
+        raise ImproperlyConfigured(f"{name} is required. {hint}")
+
+
+if not DEBUG and not IS_TESTING:
+    _require_setting(
+        "SECRET_KEY",
+        SECRET_KEY and SECRET_KEY != "django-insecure-...",
+        "Set SECRET_KEY to a strong random value.",
+    )
+    _require_setting(
+        "STRIPE_SECRET_KEY",
+        STRIPE_SECRET_KEY and STRIPE_SECRET_KEY != "dummy",
+        "Set STRIPE_SECRET_KEY in the environment.",
+    )
+    _require_setting(
+        "STRIPE_WEBHOOK_SECRET",
+        STRIPE_WEBHOOK_SECRET and STRIPE_WEBHOOK_SECRET != "dummy",
+        "Set STRIPE_WEBHOOK_SECRET in the environment.",
+    )
 
 # Ensure database monitoring signal handlers are registered
 from .. import db_monitoring  # noqa: E402,F401

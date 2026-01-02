@@ -13,7 +13,7 @@ from drf_yasg import openapi
 from django.views.decorators.csrf import csrf_exempt
 from backend.schema import schema
 from backend.graphql import CachedGraphQLView
-from backend.views import PurgeCacheView, RateLimitStatusView
+from backend.views import PurgeCacheView, RateLimitStatusView, metrics_view
 
 
 def home(request):
@@ -128,6 +128,7 @@ urlpatterns = [
     path("health/live/", liveness),
     path("health/ready/", readiness),
     path("health/", readiness),
+    path("metrics/", metrics_view, name="metrics"),
     path(".well-known/security.txt", security_txt),
     path("robots.txt", robots_txt),
     path("api/<str:version>/", include(api_urlpatterns)),
